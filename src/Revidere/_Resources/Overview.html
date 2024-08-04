@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title><!--{{TITLE}}--></title>
+    <meta http-equiv="refresh" content="10" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --main-color: #000;                                       /* oklch( 0% 0.00   0) */
+            --border-color: #033633;                                  /* oklch(30% 0.05 190) */
+            --pending-dark-color: #2f300f;                            /* oklch(30% 0.05 110) */
+            --pending-back-color: #848538;                            /* oklch(60% 0.10 110) */
+            --pending-fore-color: #dfe2bc;                            /* oklch(90% 0.05 110) */
+            --ok-dark-color: #1d341e;                                 /* oklch(30% 0.05 145) */
+            --ok-back-color: #58905a;                                 /* oklch(60% 0.10 145) */
+            --ok-fore-color: #cae7ca;                                 /* oklch(90% 0.05 145) */
+            --nok-dark-color: #44241f;                                /* oklch(30% 0.05  30) */
+            --nok-back-color: #b4685c;                                /* oklch(60% 0.10  30) */
+            --nok-fore-color: #fed2cb;                                /* oklch(90% 0.05  30) */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            margin: 1em;
+            background-color: var(--main-color);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .pending,
+        .ok,
+        .nok {
+            width: 12em;
+            height: 12em;
+            margin: 0.5em;
+            border: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .title {
+            width: 100%;
+            height: 1.5em;
+            box-sizing: border-box;
+            padding: 0.25em 0.1em 0.1em 0;
+            text-align: center;
+            font-size: 1em;
+            font-family: Verdana, sans-serif;
+            font-stretch: condensed;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pending .title {
+            background-color: var(--pending-dark-color);
+            color: var(--pending-fore-color);
+        }
+
+        .ok .title {
+            background-color: var(--ok-dark-color);
+            color: var(--ok-fore-color);
+        }
+
+        .nok .title {
+            background-color: var(--nok-dark-color);
+            color: var(--nok-fore-color);
+        }
+
+        .semaphore {
+            height: 9.3em;
+            text-align: center;
+            align-content: center;
+        }
+
+        .ok .semaphore {
+            background-color: var(--ok-back-color);
+            color: var(--ok-fore-color);
+        }
+
+        .nok .semaphore {
+            background-color: var(--nok-back-color);
+            color: var(--nok-fore-color);
+        }
+
+        .ok .semaphore::after {
+            content: "✓";
+            font-size: 7.5em;
+        }
+
+        .nok .semaphore::after {
+            content: "✗";
+            font-size: 7.5em;
+        }
+
+        .history {
+            width: 100%;
+            height: 1.2em;
+            margin-top: auto;
+            display: flex;
+            justify-content: flex-end;
+            text-align: center;
+            align-content: center;
+        }
+
+        .historicalOk {
+            width: 1.2em;
+            background-color: var(--ok-dark-color);
+            color: var(--back-color);
+        }
+
+        .historicalNok {
+            width: 1.2em;
+            background-color: var(--nok-dark-color);
+            color: var(--nok-back-color);
+        }
+
+        .historicalOk::after {
+            content: "";
+        }
+
+        .historicalNok::after {
+            content: "✗";
+        }
+    </style>
+</head>
+
+<body>
+<!--{{CONTENT}}-->
+</body>
+
+</html>
