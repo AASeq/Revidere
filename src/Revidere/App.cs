@@ -2,15 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using Serilog;
 using Serilog.Events;
 
 internal static class App {
     private static void Main() {
-        Logging.SetupConsole(LogEventLevel.Verbose);  // TODO: Configurable
-        Logging.SetupFile("revidere.log", LogEventLevel.Verbose);  // TODO: Configurable
-        //Logging.SetupSeq(new Uri("http://127.0.0.1"), LogEventLevel.Debug);  // TODO: Configurable
+        var config = new YamlConfig();
+        Logging.SetupConsole(config.GetLoggingProperties("console"));
+        Logging.SetupFile(config.GetLoggingProperties("file"));
+        Logging.SetupSeq(config.GetLoggingProperties("seq"));
         Logging.Init();
 
         var targets = new List<Target>();
