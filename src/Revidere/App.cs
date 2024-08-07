@@ -16,13 +16,23 @@ internal static class App {
         Logging.Init();
 
         var targets = new List<Target>();
-        targets.Add(new Target("dummy", "Dummy", new Uri("dummy://dummy"), CheckProfile.Default));
-        targets.Add(new Target(null, "Random 1", new Uri("random://localhost"), CheckProfile.Default));
-        targets.Add(new Target(null, "Random 2", new Uri("random://localhost2"), CheckProfile.Default));
-        targets.Add(new Target("random", "Random 3", new Uri("random://"), CheckProfile.Default));
-        targets.Add(new Target("ping", "AASeq ping", new Uri("ping://aaseq.com"), CheckProfile.Default));
-        targets.Add(new Target(null, "aaseq.com", new Uri("https://aaseq.com"), CheckProfile.Default));
-        targets.Add(new Target(null, "Random health probe", new Uri("http://localhost:8089/healthz/random"), CheckProfile.Default));
+
+        var targetsConfigList = config.GetSequencedProperties("targets");
+        foreach (var targetConfig in targetsConfigList) {
+            targetConfig.TryGetValue("name", out var name);
+            targetConfig.TryGetValue("title", out var title);
+            targetConfig.TryGetValue("target", out var targetUri1);
+            targetConfig.TryGetValue("", out var targetUri2);
+            var targetText = targetUri1 ?? targetUri2 ?? "";
+            if (!Uri.TryCreate(targetText, UriKind.Absolute, out var targetUri)) {
+                Log.Warning("Invalid target URI: {target}", targetText);
+                continue;
+            }
+
+            var target = new Target(name, title ?? name ?? "", targetUri, CheckProfile.Default);
+            targets.Add(target);
+            Log.Information("Added target {target}", target);
+        }
 
         var targetStates = new List<TargetState>();
         foreach (var target in targets) {

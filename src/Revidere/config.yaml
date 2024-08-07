@@ -1,0 +1,22 @@
+targets:
+  - 'dummy://'
+  - target: random://A
+    title: Random A
+  - target: random://B
+    title: Random B
+  - target: random://
+    name: random
+    title: Random
+  - name: ping
+    title: AASeq ping
+    target: ping://aaseq.com
+  - target: https://aaseq.com
+    title: aaseq.com
+  - title: Random Health Probe
+    target: http://localhost:8089/healthz/random
+
+web:
+  title: Revidere
+
+logging:
+  console: verbose

@@ -3,6 +3,8 @@ namespace Revidere;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using YamlDotNet.RepresentationModel;
 
@@ -52,6 +54,27 @@ internal class YamlConfig {
             }
         }
         return FrozenDictionary.ToFrozenDictionary(result, StringComparer.OrdinalIgnoreCase);
+    }
+
+    public ReadOnlyCollection<FrozenDictionary<string, string>> GetSequencedProperties(string path) {
+        var result = new List<FrozenDictionary<string, string>>();
+        foreach (var child in RootNode.Children) {
+            if (string.Equals(child.Key.ToString(), path, StringComparison.OrdinalIgnoreCase) && (child.Value is YamlSequenceNode sequence)) {
+                foreach (var element in sequence) {
+                    var props = new List<KeyValuePair<string, string>>();
+                    if (element is YamlScalarNode) {
+                        props.Add(new KeyValuePair<string, string>(string.Empty, element.ToString()));
+                    } else if (element is YamlMappingNode mapping) {
+                        foreach (var prop in mapping) {
+                            props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), prop.Value.ToString()));
+                        }
+                    }
+                    result.Add(FrozenDictionary.ToFrozenDictionary(props, StringComparer.OrdinalIgnoreCase));
+                }
+
+            }
+        }
+        return result.AsReadOnly();
     }
 
 }
