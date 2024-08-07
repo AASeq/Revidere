@@ -9,10 +9,11 @@ using Serilog;
 
 internal static class HttpThread {
 
-    public static void Start(string webTitle, IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
+    public static void Start(string webTitle, int refreshInterval, IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting HttpThread");
 
         WebTitle = webTitle;
+        RefreshInterval = refreshInterval;
         TargetStates = targetStates;
         CancellationToken = cancellationToken;
 
@@ -35,6 +36,7 @@ internal static class HttpThread {
     private static CancellationToken? CancellationToken;
     private static IReadOnlyList<TargetState>? TargetStates;
     private static string WebTitle = string.Empty;
+    private static int RefreshInterval = 10;
 
 
     private static async Task Run() {
@@ -64,7 +66,7 @@ internal static class HttpThread {
 
         using var response = context.Response;
         if (path == "/") {
-            Html.FillResponse(response, targetStates, WebTitle);
+            Html.FillResponse(response, targetStates, WebTitle, RefreshInterval);
             return true;
         } else if (path.Equals("/healthz", StringComparison.OrdinalIgnoreCase)) {
             HealthZ.FillRootResponse(response, targetStates);

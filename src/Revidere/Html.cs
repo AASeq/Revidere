@@ -1,5 +1,6 @@
 namespace Revidere;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,7 +13,7 @@ internal static class Html {
 
     private static readonly Encoding Utf8 = new UTF8Encoding(false);
 
-    public static void FillResponse(HttpListenerResponse response, IEnumerable<TargetState> targetStates, string webTitle) {
+    public static void FillResponse(HttpListenerResponse response, IEnumerable<TargetState> targetStates, string webTitle, int refreshInterval) {
         var sw = Stopwatch.StartNew();
         try {
             Log.Verbose("Starting HTML response");
@@ -23,6 +24,7 @@ internal static class Html {
             var content = new StringBuilder(reader.ReadToEnd());
 
             content.Replace("<!--{{TITLE}}-->", webTitle);
+            content.Replace("<!--{{REFRESH}}-->", refreshInterval.ToString("0"));
 
             var sb = new StringBuilder();
             sb.AppendLine("    " + """<div class="container">""");

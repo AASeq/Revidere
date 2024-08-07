@@ -10,14 +10,19 @@ targets:
   - name: ping
     title: AASeq ping
     target: ping://aaseq.com
+    timeout: 0.1
   - target: https://aaseq.com
     title: aaseq.com
+    period: 30
+    timeout: 0.1
   - title: Random Health Probe
     target: http://localhost:8089/healthz/random
+    success: 3
+    failure: 2
 
 web:
   title: Status
-  refresh: 5
+  refresh: 10
 
 logging:
   console: verbose
