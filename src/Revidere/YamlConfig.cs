@@ -4,7 +4,6 @@ using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using YamlDotNet.RepresentationModel;
 
@@ -13,6 +12,10 @@ using YamlDotNet.RepresentationModel;
 /// </summary>
 internal class YamlConfig {
 
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <exception cref="FileNotFoundException">No config file found.</exception>
     public YamlConfig() {
         foreach (var filePath in new string[] { "config.yaml", "/config/config.yaml" }) {
             var info = new FileInfo(filePath);
@@ -26,6 +29,10 @@ internal class YamlConfig {
         if (RootNode == null) throw new FileNotFoundException("No config file found.");
     }
 
+    /// <summary>
+    /// Creates a new instance.
+    /// </summary>
+    /// <param name="stream">Stream.</param>
     public YamlConfig(Stream stream) {
         var yaml = new YamlStream();
         yaml.Load(new StreamReader(stream));
@@ -34,6 +41,12 @@ internal class YamlConfig {
 
     private readonly YamlMappingNode RootNode;
 
+
+    /// <summary>
+    /// Returns the logging properties for the specified logging type.
+    /// Match is done from 'logging' root level element.
+    /// </summary>
+    /// <param name="type">Logging type (e.g. console, file, etc.)</param>
     public FrozenDictionary<string, string> GetLoggingProperties(string type) {
         var result = new List<KeyValuePair<string, string>>();
         foreach (var child in RootNode.Children) {
@@ -56,25 +69,49 @@ internal class YamlConfig {
         return FrozenDictionary.ToFrozenDictionary(result, StringComparer.OrdinalIgnoreCase);
     }
 
-    public ReadOnlyCollection<FrozenDictionary<string, string>> GetSequencedProperties(string path) {
+    /// <summary>
+    /// Returns the list of properties for the specified root level element.
+    /// Any element that is not a list will be flattened to a single element with an empty key.
+    /// </summary>
+    /// <param name="path">Root level element path.</param>
+    public ReadOnlyCollection<FrozenDictionary<string, string>> GetSequenceProperties(string path) {
         var result = new List<FrozenDictionary<string, string>>();
         foreach (var child in RootNode.Children) {
-            if (string.Equals(child.Key.ToString(), path, StringComparison.OrdinalIgnoreCase) && (child.Value is YamlSequenceNode sequence)) {
-                foreach (var element in sequence) {
-                    var props = new List<KeyValuePair<string, string>>();
-                    if (element is YamlScalarNode) {
-                        props.Add(new KeyValuePair<string, string>(string.Empty, element.ToString()));
-                    } else if (element is YamlMappingNode mapping) {
-                        foreach (var prop in mapping) {
-                            props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), prop.Value.ToString()));
+            if (string.Equals(child.Key.ToString(), path, StringComparison.OrdinalIgnoreCase)) {
+                if (child.Value is YamlSequenceNode sequence) {
+                    foreach (var element in sequence) {
+                        var props = new List<KeyValuePair<string, string>>();
+                        if (element is YamlScalarNode) {
+                            props.Add(new KeyValuePair<string, string>(string.Empty, element.ToString()));
+                        } else if (element is YamlMappingNode mapping) {
+                            foreach (var prop in mapping) {
+                                props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), prop.Value.ToString()));
+                            }
                         }
+                        result.Add(FrozenDictionary.ToFrozenDictionary(props, StringComparer.OrdinalIgnoreCase));
                     }
-                    result.Add(FrozenDictionary.ToFrozenDictionary(props, StringComparer.OrdinalIgnoreCase));
                 }
-
             }
         }
         return result.AsReadOnly();
+    }
+    /// <summary>
+    /// Returns the properties for the specified root level element.
+    /// Any element that is not a list will be flattened to a single element with an empty key.
+    /// </summary>
+    /// <param name="path">Root level element path.</param>
+    public FrozenDictionary<string, string> GetProperties(string path) {
+        var props = new List<KeyValuePair<string, string>>();
+        foreach (var child in RootNode.Children) {
+            if (string.Equals(child.Key.ToString(), path, StringComparison.OrdinalIgnoreCase)) {
+                if (child.Value is YamlMappingNode mapping) {
+                    foreach (var prop in mapping) {
+                        props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), prop.Value.ToString()));
+                    }
+                }
+            }
+        }
+        return FrozenDictionary.ToFrozenDictionary(props, StringComparer.OrdinalIgnoreCase);
     }
 
 }

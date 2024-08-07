@@ -6,13 +6,13 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
-using Serilog.Core;
 
 internal static class HttpThread {
 
-    public static void Start(IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
+    public static void Start(string webTitle, IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting HttpThread");
 
+        WebTitle = webTitle;
         TargetStates = targetStates;
         CancellationToken = cancellationToken;
 
@@ -34,6 +34,7 @@ internal static class HttpThread {
     private static Thread? Thread;
     private static CancellationToken? CancellationToken;
     private static IReadOnlyList<TargetState>? TargetStates;
+    private static string WebTitle = string.Empty;
 
 
     private static async Task Run() {
@@ -63,7 +64,7 @@ internal static class HttpThread {
 
         using var response = context.Response;
         if (path == "/") {
-            Html.FillResponse(response, targetStates);
+            Html.FillResponse(response, targetStates, WebTitle);
             return true;
         } else if (path.Equals("/healthz", StringComparison.OrdinalIgnoreCase)) {
             HealthZ.FillRootResponse(response, targetStates);

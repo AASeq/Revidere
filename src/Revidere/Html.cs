@@ -11,14 +11,14 @@ internal static class Html {
 
     private static readonly Encoding Utf8 = new UTF8Encoding(false);
 
-    public static void FillResponse(HttpListenerResponse response, IEnumerable<TargetState> targetStates) {
+    public static void FillResponse(HttpListenerResponse response, IEnumerable<TargetState> targetStates, string webTitle) {
         Log.Verbose("Starting HTML response");
         var assembly = Assembly.GetExecutingAssembly();
         using var stream = assembly.GetManifestResourceStream("Revidere._Resources.Overview.html");
         using var reader = new StreamReader(stream!);
         var content = new StringBuilder(reader.ReadToEnd());
 
-        content.Replace("<!--{{TITLE}}-->", "Revidere");
+        content.Replace("<!--{{TITLE}}-->", webTitle);
 
         var sb = new StringBuilder();
         sb.AppendLine("""<div class="container">""");

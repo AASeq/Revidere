@@ -16,7 +16,8 @@ targets:
     target: http://localhost:8089/healthz/random
 
 web:
-  title: Revidere
+  title: Status
+  refresh: 5
 
 logging:
   console: verbose

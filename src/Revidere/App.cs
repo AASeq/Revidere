@@ -2,22 +2,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Globalization;
 using System.Threading;
 using Serilog;
-using Serilog.Events;
 
 internal static class App {
     private static void Main() {
         var config = new YamlConfig();
+
+        // Config: Logging
         Logging.SetupConsole(config.GetLoggingProperties("console"));
         Logging.SetupFile(config.GetLoggingProperties("file"));
         Logging.SetupSeq(config.GetLoggingProperties("seq"));
         Logging.Init();
 
+        // Config: Targets
         var targets = new List<Target>();
-
-        var targetsConfigList = config.GetSequencedProperties("targets");
+        var targetsConfigList = config.GetSequenceProperties("targets");
         foreach (var targetConfig in targetsConfigList) {
             targetConfig.TryGetValue("name", out var name);
             targetConfig.TryGetValue("title", out var title);
@@ -28,10 +29,24 @@ internal static class App {
                 Log.Warning("Invalid target URI: {target}", targetText);
                 continue;
             }
-
             var target = new Target(name, title ?? name ?? "", targetUri, CheckProfile.Default);
             targets.Add(target);
             Log.Information("Added target {target}", target);
+        }
+
+        // Config: Web
+        var webConfig = config.GetProperties("web");
+        webConfig.TryGetValue("title", out var webTitle);
+        webTitle ??= "Revidere";
+        webConfig.TryGetValue("refresh", out var webRefreshText);
+        int.TryParse(webRefreshText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var webRefresh);
+        if (webRefresh == 0) {
+        } else if (webRefresh < 5) {
+            webRefresh = 5;
+            Log.Warning("Web refresh interval too low; adjusted to {interval} seconds", webRefresh);
+        } else if (webRefresh > 60) {
+            webRefresh = 60;
+            Log.Warning("Web refresh interval too high; adjusted to {interval} seconds", webRefresh);
         }
 
         var targetStates = new List<TargetState>();
@@ -46,7 +61,7 @@ internal static class App {
             source.Cancel();
         };
 
-        HttpThread.Start(targetStates, source.Token);
+        HttpThread.Start(webTitle, targetStates, source.Token);
         CheckerThread.Start(targetStates, source.Token);
 
         source.Token.WaitHandle.WaitOne();
