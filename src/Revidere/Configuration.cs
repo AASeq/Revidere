@@ -20,18 +20,25 @@ internal class Configuration {
         var config = new YamlConfig();
 
         // Config: Logging
+
         Logging.SetupConsole(config.GetLoggingProperties("console"));
         Logging.SetupFile(config.GetLoggingProperties("file"));
         Logging.SetupSeq(config.GetLoggingProperties("seq"));
+
         Logging.Init();
 
+
         // Config: Web
+
         var webConfig = config.GetProperties("web");
+
         webConfig.TryGetValue("prefix", out var webPrefix);
         if (string.IsNullOrEmpty(webPrefix)) { webPrefix = "http://*:8089/"; }
         if (!webPrefix.EndsWith('/')) { webPrefix += "/"; }  // prefix must end with a trailing slash
+
         webConfig.TryGetValue("title", out var webTitle);
         webTitle ??= "Revidere";
+
         webConfig.TryGetValue("refresh", out var webRefreshText);
         int.TryParse(webRefreshText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var webRefresh);
         if (webRefresh == 0) {
@@ -44,20 +51,29 @@ internal class Configuration {
             webRefresh = 60;
             Log.Warning("Web refresh interval too high; adjusted to {interval} seconds", webRefresh);
         }
+
         var webConfiguration = new WebConfiguration(webPrefix, webTitle, webRefresh);
 
 
         // Config: Checks
+
         var checks = new List<Check>();
+
         var checksConfigList = config.GetSequenceProperties("checks");
         foreach (var checkConfig in checksConfigList) {
+            checkConfig.TryGetValue("kind", out var checkKind);
+            checkConfig.TryGetValue("target", out var checkTargetText);  // either just number target (default) or allow URL-based target
             checkConfig.TryGetValue("name", out var checkName);
             checkConfig.TryGetValue("title", out var checkTitle);
-            checkConfig.TryGetValue("target", out var checkTargetUri1);
-            checkConfig.TryGetValue("", out var checkTargetUri2);
-            var checkTargetText = checkTargetUri1 ?? checkTargetUri2 ?? "";
-            if (!Uri.TryCreate(checkTargetText, UriKind.Absolute, out var checkTarget)) {
-                Log.Warning("Invalid target URI: {target}", checkTargetText);
+            checkConfig.TryGetValue("", out var checkTargetText2);  // URL-based target (only if proper target is not set)
+            checkTargetText ??= checkTargetText2 ?? "";
+            string? checkTarget = checkTargetText;
+            if (checkKind == null) {
+                (checkKind, checkTarget) = GetCheckKindAndTarget(checkTargetText);
+            }
+
+            if (checkKind == null) {
+                Log.Warning("Check kind not set; skipping check");
                 continue;
             }
 
@@ -73,6 +89,7 @@ internal class Configuration {
                 checkPeriod = 600;
                 Log.Warning("Check period too high; adjusted to {interval} seconds", checkPeriod);
             }
+
             checkConfig.TryGetValue("timeout", out var checkTimeoutText);
             double.TryParse(checkTimeoutText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkTimeout);
             if (checkTimeout == 0) {
@@ -85,6 +102,7 @@ internal class Configuration {
                 checkTimeout = 60;
                 Log.Warning("Check timeout too high; adjusted to {interval} seconds", checkTimeout);
             }
+
             checkConfig.TryGetValue("success", out var checkSuccessText);
             int.TryParse(checkSuccessText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkSuccess);
             if (checkSuccess == 0) {
@@ -97,6 +115,7 @@ internal class Configuration {
                 checkSuccess = 10;
                 Log.Warning("Check success count too high; adjusted to {count}", checkSuccess);
             }
+
             checkConfig.TryGetValue("failure", out var checkFailureText);
             int.TryParse(checkFailureText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkFailure);
             if (checkFailure == 0) {
@@ -110,23 +129,35 @@ internal class Configuration {
                 Log.Warning("Check failure count too high; adjusted to {count}", checkFailure);
             }
 
-            var check = new Check(
-                                    checkName,
-                                    checkTitle ?? checkName ?? "",
-                                    checkTarget,
-                                    new CheckProfile(
-                                                     TimeSpan.FromSeconds(checkPeriod),
-                                                     TimeSpan.FromSeconds(checkTimeout),
-                                                     checkSuccess,
-                                                     checkFailure
-                                                    )
-                                   );
+            var check = Check.FromConfigData(
+                checkKind,
+                checkTarget ?? "",
+                checkTitle ?? checkName ?? checkKind,
+                checkName,
+                new CheckProfile(TimeSpan.FromSeconds(checkPeriod), TimeSpan.FromSeconds(checkTimeout), checkSuccess, checkFailure));
             checks.Add(check);
-            Log.Information("Added check {check}", check);
+
+            Log.Information("Added check {check} ({destination})", check, check.Kind.ToUpperInvariant() + (string.IsNullOrEmpty(check.Target) ? "" : " " + check.Target));
         }
 
 
         return new Configuration(webConfiguration, checks);
+    }
+
+    private static (string? checkKind, string? checkTarget) GetCheckKindAndTarget(string targetUri) {
+        var parts = targetUri.Split("://", 2);
+        if (parts.Length < 1) { return (null, null); }
+
+        var scheme = parts[0];
+        var rest = parts[1] ?? "";
+
+        if (scheme.Equals("http", StringComparison.OrdinalIgnoreCase)) {
+            return ("get", "http://" + rest);
+        } else if (scheme.Equals("https", StringComparison.OrdinalIgnoreCase)) {
+            return ("get", "https://" + rest);
+        } else {
+            return (scheme, rest);
+        }
     }
 }
 

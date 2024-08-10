@@ -5,9 +5,9 @@ using System.Threading;
 
 internal class RandomChecker : IChecker {
 
-    public RandomChecker(Uri target) {
+    public RandomChecker(string target) {
         var seed = 0;
-        foreach (var ch in target.Host) {
+        foreach (var ch in target) {
             seed = (seed << 5) ^ (seed << 3) ^ (seed << 1) ^ ch;
         }
         _random = (seed == 0) ? new Random((int)DateTime.Now.Ticks) : new Random(seed);
