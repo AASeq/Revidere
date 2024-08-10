@@ -7,8 +7,8 @@ using Serilog;
 
 internal class PingChecker : IChecker {
 
-    public PingChecker(Uri targetUri) {
-        Host = targetUri.Host;
+    public PingChecker(Uri target) {
+        Host = target.Host;
     }
 
     private readonly string Host;

@@ -4,12 +4,12 @@ using System;
 using System.Collections.Generic;
 using Serilog;
 
-internal class TargetState {
+internal class CheckState {
 
-    internal TargetState(Target target) {
-        if (target == null) { throw new ArgumentNullException(nameof(target), "Target cannot be null."); }
+    internal CheckState(Check check) {
+        if (check == null) { throw new ArgumentNullException(nameof(check), "Check cannot be null."); }
 
-        Target = target;
+        Check = check;
         IsHealthy = null;
     }
 
@@ -17,7 +17,7 @@ internal class TargetState {
     /// <summary>
     /// Gets target.
     /// </summary>
-    public Target Target { get; }
+    public Check Check { get; }
 
     /// <summary>
     /// Gets if target is healthy
@@ -61,7 +61,7 @@ internal class TargetState {
         while (_healthHistory.Count > 10) { _healthHistory.RemoveAt(0); }
 
         if (isHealthy != IsHealthy) {  // check only if status has changed
-            var maxCount = isHealthy ? Target.CheckProfile.SuccessCount : Target.CheckProfile.FailureCount;
+            var maxCount = isHealthy ? Check.CheckProfile.SuccessCount : Check.CheckProfile.FailureCount;
             if (_healthHistory.Count >= maxCount) {
                 var anyNonMatching = false;
                 for (var i = _healthHistory.Count - maxCount; i < _healthHistory.Count; i++) {
@@ -72,7 +72,7 @@ internal class TargetState {
                 }
                 if (!anyNonMatching) {
                     IsHealthy = isHealthy;
-                    Log.Debug("Changed state for {Target}: {Status} (after {Count} checks)", Target, isHealthy ? "healthy" : "unhealthy", maxCount);
+                    Log.Debug("Changed state for {Check}: {Status} (after {Count} checks)", Check, isHealthy ? "healthy" : "unhealthy", maxCount);
                     LastChanged = timestamp;
                 }
             }

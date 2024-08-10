@@ -7,11 +7,11 @@ using Serilog;
 
 internal class HttpChecker : IChecker {
 
-    public HttpChecker(Uri targetUri) {
-        TargetUri = targetUri;
+    public HttpChecker(Uri target) {
+        Target = target;
     }
 
-    private readonly Uri TargetUri;
+    private readonly Uri Target;
     private static readonly HttpClient HttpClient = new();
 
     public bool CheckIsHealthy(CancellationToken cancellationToken, TimeSpan timeout) {
@@ -19,12 +19,12 @@ internal class HttpChecker : IChecker {
             var timeoutCancelSource = new CancellationTokenSource(timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);
 
-            var request = new HttpRequestMessage(HttpMethod.Get, TargetUri);
+            var request = new HttpRequestMessage(HttpMethod.Get, Target);
             var response = HttpClient.SendAsync(request, linkedCancelSource.Token).Result;
-            Log.Verbose("HTTP check for {Uri}: {Status}", TargetUri, response.StatusCode);
+            Log.Verbose("HTTP check for {Uri}: {Status}", Target, response.StatusCode);
             return response.IsSuccessStatusCode;
         } catch (Exception ex) {
-            Log.Verbose("HTTP check for {Uri}: {Status}", TargetUri, ex);
+            Log.Verbose("HTTP check for {Uri}: {Status}", Target, ex);
             return false;
         }
     }

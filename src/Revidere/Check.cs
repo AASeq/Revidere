@@ -3,40 +3,40 @@ namespace Revidere;
 using System;
 using System.Text.RegularExpressions;
 
-internal partial class Target {
+internal partial class Check {
 
     /// <summary>
     /// Creates a new instance.
     /// </summary>
     /// <param name="name">Name of target.</param>
     /// <param name="title">Title of target.</param>
-    /// <param name="targetUri">Target URL</param>
+    /// <param name="target">Target URL</param>
     /// <param name="profile">Check profile.</param>
     /// <exception cref="ArgumentNullException">Name cannot be null. -or- Target URI cannot be null. -or- Profile cannot be null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters.</exception>
-    internal Target(string? name, string title, Uri targetUri, CheckProfile profile) {
+    internal Check(string? name, string title, Uri target, CheckProfile profile) {
         if ((name != null) && !NameRegex.IsMatch(name)) { throw new ArgumentOutOfRangeException(nameof(name), "Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters."); }
-        if (targetUri == null) { throw new ArgumentNullException(nameof(targetUri), "Target URI cannot be null."); }
+        if (target == null) { throw new ArgumentNullException(nameof(target), "Target URI cannot be null."); }
 
         Name = name;
         Title = title ?? name ?? string.Empty;
-        TargetUri = targetUri;
+        Target = target;
         CheckProfile = profile ?? throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
 
-        Checker = targetUri.Scheme switch {
+        Checker = target.Scheme switch {
             "dummy" => new DummyChecker(),
-            "http" => new HttpChecker(targetUri),
-            "https" => new HttpChecker(targetUri),
-            "ping" => new PingChecker(targetUri),
-            "random" => new RandomChecker(targetUri),
-            _ => throw new NotSupportedException($"Scheme '{targetUri.Scheme}' is not supported."),
+            "http" => new HttpChecker(target),
+            "https" => new HttpChecker(target),
+            "ping" => new PingChecker(target),
+            "random" => new RandomChecker(target),
+            _ => throw new NotSupportedException($"Scheme '{target.Scheme}' is not supported."),
         };
     }
 
 
     public string? Name { get; }
     public string Title { get; }
-    public Uri TargetUri { get; }
+    public Uri Target { get; }
     public CheckProfile CheckProfile { get; }
 
 
@@ -52,5 +52,5 @@ internal partial class Target {
     private static partial Regex MyRegex();
 
 
-    override public string ToString() => TargetUri.ToString();
+    override public string ToString() => Target.ToString();
 }

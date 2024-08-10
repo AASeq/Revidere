@@ -5,12 +5,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Revidere;
 
 [TestClass]
-public class TargetStateTests {
+public class CheckStateTests {
 
     [TestMethod]
     public void Basic() {
-        var test = new Target("dummy", "Dummy", new Uri("dummy://localhost"), new CheckProfile(1, 1));
-        var state = new TargetState(test);
+        var test = new Check("dummy", "Dummy", new Uri("dummy://localhost"), new CheckProfile(1, 1));
+        var state = new CheckState(test);
 
         Assert.AreEqual(null, state.IsHealthy);
         Assert.AreEqual(0, state.HealthHistory.Count);
@@ -29,8 +29,8 @@ public class TargetStateTests {
 
     [TestMethod]
     public void Default() {
-        var test = new Target("dummy", "Dummy", new Uri("dummy://localhost"), CheckProfile.Default);
-        var state = new TargetState(test);
+        var test = new Check("dummy", "Dummy", new Uri("dummy://localhost"), CheckProfile.Default);
+        var state = new CheckState(test);
 
         Assert.AreEqual(null, state.IsHealthy);
         Assert.AreEqual(0, state.HealthHistory.Count);

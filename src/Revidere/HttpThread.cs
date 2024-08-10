@@ -9,13 +9,11 @@ using Serilog;
 
 internal static class HttpThread {
 
-    public static void Start(string webUriPrefix, string webTitle, int refreshInterval, IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
+    public static void Start(WebConfiguration configuration, IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting HttpThread");
 
-        WebUriPrefix = webUriPrefix;
-        WebTitle = webTitle;
-        RefreshInterval = refreshInterval;
-        TargetStates = targetStates;
+        Configuration = configuration;
+        CheckStates = checkStates;
         CancellationToken = cancellationToken;
 
         Thread = new Thread(() => {
@@ -38,59 +36,57 @@ internal static class HttpThread {
     }
 
 
+    private static WebConfiguration? Configuration;
+    private static IReadOnlyList<CheckState>? CheckStates;
     private static Thread? Thread;
     private static CancellationToken? CancellationToken;
-    private static IReadOnlyList<TargetState>? TargetStates;
-    private static string WebUriPrefix = string.Empty;
-    private static string WebTitle = string.Empty;
-    private static int RefreshInterval = 10;
 
 
     private static async Task Run() {
         Log.Debug("Started HttpThread");
 
         var cancellationToken = CancellationToken!.Value;
-        var targetStates = TargetStates;
+        var checkStates = CheckStates;
 
         var listener = new HttpListener();
-        listener.Prefixes.Add(WebUriPrefix);
+        listener.Prefixes.Add(Configuration!.Prefix);
         listener.Start();
 
         while (!cancellationToken.IsCancellationRequested) {
             try {
                 var context = await listener.GetContextAsync().WaitAsync(cancellationToken); ;
-                ProcessHttp(context, targetStates!);
+                ProcessHttp(context, checkStates!);
             } catch (TaskCanceledException) { }
         }
 
         Log.Debug("Stopped HttpThread");
     }
 
-    private static bool ProcessHttp(HttpListenerContext context, IReadOnlyList<TargetState> targetStates) {
+    private static bool ProcessHttp(HttpListenerContext context, IReadOnlyList<CheckState> checkStates) {
         var request = context.Request;
         var path = request.Url?.AbsolutePath ?? string.Empty;
         Log.Verbose("Processing HTTP request for {Path}", path);
 
         using var response = context.Response;
         if (path == "/") {
-            Html.FillResponse(response, targetStates, WebTitle, RefreshInterval);
+            Html.FillResponse(response, checkStates, Configuration!.Title, Configuration!.RefreshInterval);
             return true;
         } else if (path.Equals("/healthz", StringComparison.OrdinalIgnoreCase)) {
-            HealthZ.FillRootResponse(response, targetStates);
+            HealthZ.FillRootResponse(response, checkStates);
             return true;
         } else if (path.StartsWith("/healthz/", StringComparison.OrdinalIgnoreCase)) {  // individual healthcheck
-            var targetName = path["/healthz/".Length..];
-            if (string.IsNullOrEmpty(targetName)) {
-                HealthZ.FillRootResponse(response, targetStates);
+            var checkName = path["/healthz/".Length..];
+            if (string.IsNullOrEmpty(checkName)) {
+                HealthZ.FillRootResponse(response, checkStates);
             } else {
-                foreach (var targetState in targetStates) {
-                    if (string.Equals(targetState.Target.Name, targetName, StringComparison.OrdinalIgnoreCase)) {
-                        HealthZ.FillTargetResponse(response, targetState);
+                foreach (var checkState in checkStates) {
+                    if (string.Equals(checkState.Check.Name, checkName, StringComparison.OrdinalIgnoreCase)) {
+                        HealthZ.FillCheckResponse(response, checkState);
                         return true;
                     }
                 }
             }
-            Log.Debug("Cannot find target named {TargetName}", targetName);
+            Log.Debug("Cannot find check named {CheckName}", checkName);
         }
 
         Log.Debug("URL at {Path} not found", path);
