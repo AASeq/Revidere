@@ -8,7 +8,7 @@ using Serilog;
 internal static class CheckerThread {
 
     public static void Start(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
-        Log.Verbose("Starting CheckerThread");
+        Log.Verbose("Starting Checker thread");
         CheckStates = checkStates;
         CancellationToken = cancellationToken;
 
@@ -20,7 +20,7 @@ internal static class CheckerThread {
     }
 
     public static void Stop() {
-        Log.Verbose("Stopping CheckerThread");
+        Log.Verbose("Stopping Checker thread");
         Thread?.Join();
     }
 
@@ -32,7 +32,7 @@ internal static class CheckerThread {
 
 
     private static void Run() {
-        Log.Verbose("Started CheckerThread");
+        Log.Verbose("Started Checker thread");
 
         var cancellationToken = CancellationToken!.Value;
         var checkStates = CheckStates!;
@@ -58,7 +58,7 @@ internal static class CheckerThread {
             }
         }
 
-        Log.Verbose("Stopped CheckerThread");
+        Log.Verbose("Stopped Checker thread");
     }
 
 

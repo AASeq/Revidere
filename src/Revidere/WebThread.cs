@@ -10,7 +10,7 @@ using Serilog;
 internal static class WebThread {
 
     public static void Start(WebConfiguration configuration, IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
-        Log.Verbose("Starting HttpThread");
+        Log.Verbose("Starting Web thread");
 
         Configuration = configuration;
         CheckStates = checkStates;
@@ -25,13 +25,13 @@ internal static class WebThread {
             }
         }) {
             IsBackground = true,
-            Name = "Listener",
+            Name = "Web",
         };
         Thread.Start();
     }
 
     public static void Stop() {
-        Log.Verbose("Stopping HttpThread");
+        Log.Verbose("Stopping Web thread");
         Thread?.Join();
     }
 
@@ -43,7 +43,7 @@ internal static class WebThread {
 
 
     private static async Task Run() {
-        Log.Debug("Started HttpThread");
+        Log.Debug("Started Web thread");
 
         var cancellationToken = CancellationToken!.Value;
         var checkStates = CheckStates;
@@ -59,7 +59,7 @@ internal static class WebThread {
             } catch (TaskCanceledException) { }
         }
 
-        Log.Debug("Stopped HttpThread");
+        Log.Debug("Stopped Web thread");
     }
 
     private static bool ProcessHttp(HttpListenerContext context, IReadOnlyList<CheckState> checkStates) {
