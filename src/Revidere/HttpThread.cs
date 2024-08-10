@@ -9,16 +9,22 @@ using Serilog;
 
 internal static class HttpThread {
 
-    public static void Start(string webTitle, int refreshInterval, IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
+    public static void Start(string webUriPrefix, string webTitle, int refreshInterval, IReadOnlyList<TargetState> targetStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting HttpThread");
 
+        WebUriPrefix = webUriPrefix;
         WebTitle = webTitle;
         RefreshInterval = refreshInterval;
         TargetStates = targetStates;
         CancellationToken = cancellationToken;
 
         Thread = new Thread(() => {
-            Task.Run(async () => { await Run(); }).Wait();
+            try {
+                Task.Run(async () => { await Run(); }).Wait();
+            } catch (AggregateException ex) {
+                if (ex.InnerException == null) { throw; }
+                throw ex.InnerException;  // just return the first one
+            }
         }) {
             IsBackground = true,
             Name = "Listener",
@@ -35,6 +41,7 @@ internal static class HttpThread {
     private static Thread? Thread;
     private static CancellationToken? CancellationToken;
     private static IReadOnlyList<TargetState>? TargetStates;
+    private static string WebUriPrefix = string.Empty;
     private static string WebTitle = string.Empty;
     private static int RefreshInterval = 10;
 
@@ -46,7 +53,7 @@ internal static class HttpThread {
         var targetStates = TargetStates;
 
         var listener = new HttpListener();
-        listener.Prefixes.Add("http://*:8089/");
+        listener.Prefixes.Add(WebUriPrefix);
         listener.Start();
 
         while (!cancellationToken.IsCancellationRequested) {

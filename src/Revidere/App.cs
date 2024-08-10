@@ -96,6 +96,9 @@ internal static class App {
 
         // Config: Web
         var webConfig = config.GetProperties("web");
+        webConfig.TryGetValue("prefix", out var webPrefix);
+        if (string.IsNullOrEmpty(webPrefix)) { webPrefix = "http://*:8089/"; }
+        if (!webPrefix.EndsWith('/')) { webPrefix += "/"; }  // prefix must end with a trailing slash
         webConfig.TryGetValue("title", out var webTitle);
         webTitle ??= "Revidere";
         webConfig.TryGetValue("refresh", out var webRefreshText);
@@ -124,7 +127,7 @@ internal static class App {
             source.Cancel();
         };
 
-        HttpThread.Start(webTitle, webRefresh, targetStates, source.Token);
+        HttpThread.Start(webPrefix, webTitle, webRefresh, targetStates, source.Token);
         CheckerThread.Start(targetStates, source.Token);
 
         source.Token.WaitHandle.WaitOne();
