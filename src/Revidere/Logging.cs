@@ -66,7 +66,7 @@ internal static class Logging {
 
     public static void SetupFile(FrozenDictionary<string, string> properties) {
         // level: none, verbose, debug, information, warning, error, fatal      # log level (default: debug)
-        // file: /var/log/test.log                                              # file name (default: based on assembly name)
+        // path: /var/log/test.log                                              # file name (default: based on assembly name)
         // (if neither level nor file are defined then sink is not used)
 
         LogEventLevel? level = null;
@@ -76,7 +76,7 @@ internal static class Logging {
             level = parsedLevel;
         }
 
-        if (properties.TryGetValue("file", out var filePath)) {  // file is defined
+        if (properties.TryGetValue("path", out var filePath)) {  // file is defined
             SetupFile(filePath, level ?? LogEventLevel.Debug);
         } else if (level != null) {  // level is defined, use default file
             var assemblyName = (Assembly.GetEntryAssembly()?.GetName().Name) ?? throw new InvalidOperationException("Cannot determine logging file name.");
