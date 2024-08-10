@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 
-internal static class HttpThread {
+internal static class WebThread {
 
     public static void Start(WebConfiguration configuration, IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting HttpThread");

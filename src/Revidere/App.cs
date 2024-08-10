@@ -22,11 +22,11 @@ internal static class App {
             source.Cancel();
         };
 
-        HttpThread.Start(config.Web, checkStates, source.Token);
+        WebThread.Start(config.Web, checkStates, source.Token);
         CheckerThread.Start(checkStates, source.Token);
 
         source.Token.WaitHandle.WaitOne();
         CheckerThread.Stop();
-        HttpThread.Stop();
+        WebThread.Stop();
     }
 }
