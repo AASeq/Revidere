@@ -5,7 +5,7 @@ using Serilog;
 
 namespace Revidere;
 
-internal class Configuration {
+internal sealed class Configuration {
 
     private Configuration(WebConfiguration webConfiguration, IEnumerable<Check> checks) {
         Web = webConfiguration;

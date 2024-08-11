@@ -5,9 +5,9 @@ using System.Net.Http;
 using System.Threading;
 using Serilog;
 
-internal class HttpCheck : Check {
+internal sealed class HttpCheck : Check {
 
-    public HttpCheck(string kind, string target, string title, string? name, CheckProfile profile)
+    internal HttpCheck(string kind, string target, string title, string? name, CheckProfile profile)
         : base(kind, target, title, name, profile) {
     }
 

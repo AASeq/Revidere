@@ -5,9 +5,9 @@ using System.Net.NetworkInformation;
 using System.Threading;
 using Serilog;
 
-internal class PingCheck : Check {
+internal sealed class PingCheck : Check {
 
-    public PingCheck(string kind, string target, string title, string? name, CheckProfile profile)
+    internal PingCheck(string kind, string target, string title, string? name, CheckProfile profile)
         : base(kind, target, title, name, profile) {
     }
 

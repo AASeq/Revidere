@@ -9,7 +9,6 @@ internal static class App {
     private static void Main() {
         var config = Configuration.Load();
 
-
         var checkStates = new List<CheckState>();
         foreach (var check in config.Checks) {
             checkStates.Add(new CheckState(check));

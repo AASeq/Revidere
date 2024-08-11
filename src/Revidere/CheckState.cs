@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using Serilog;
 
-internal class CheckState {
+internal sealed class CheckState {
 
     internal CheckState(Check check) {
         if (check == null) { throw new ArgumentNullException(nameof(check), "Check cannot be null."); }

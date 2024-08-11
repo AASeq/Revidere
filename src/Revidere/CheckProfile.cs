@@ -2,7 +2,7 @@ namespace Revidere;
 
 using System;
 
-internal class CheckProfile {
+internal sealed class CheckProfile {
 
     /// <summary>
     /// Creates new instance.

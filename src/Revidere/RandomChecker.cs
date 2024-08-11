@@ -3,9 +3,9 @@ namespace Revidere;
 using System;
 using System.Threading;
 
-internal class RandomCheck : Check {
+internal sealed class RandomCheck : Check {
 
-    public RandomCheck(string kind, string target, string title, string? name, CheckProfile profile)
+    internal RandomCheck(string kind, string target, string title, string? name, CheckProfile profile)
         : base(kind, target, title, name, profile) {
         var seed = 0;
         foreach (var ch in target) {

@@ -10,7 +10,7 @@ using YamlDotNet.RepresentationModel;
 /// <summary>
 /// Simplified and premissive parsing of yaml file.
 /// </summary>
-internal class YamlConfig {
+internal sealed class YamlConfig {
 
     /// <summary>
     /// Creates a new instance.

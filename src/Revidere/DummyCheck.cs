@@ -1,11 +1,10 @@
 namespace Revidere;
 
-using System;
 using System.Threading;
 
-internal class DummyCheck : Check {
+internal sealed class DummyCheck : Check {
 
-    public DummyCheck(string kind, string target, string title, string? name, CheckProfile profile)
+    internal DummyCheck(string kind, string target, string title, string? name, CheckProfile profile)
         : base(kind, target, title, name, profile) {
     }
 
