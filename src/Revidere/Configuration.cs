@@ -95,11 +95,11 @@ internal sealed class Configuration {
             if (checkTimeout == 0) {
                 checkTimeout = CheckProfile.Default.Timeout.TotalSeconds;  // default
                 if (checkTimeoutText != null) { Log.Information("Check timeout using default of {interval} seconds", checkTimeout); }
-            } else if (checkTimeout < 0.1) {
-                checkTimeout = 1;
+            } else if (checkTimeout < 0.01) {
+                checkTimeout = 0.01;
                 Log.Warning("Check timeout too low; adjusted to {interval} seconds", checkTimeout);
-            } else if (checkTimeout > 60) {
-                checkTimeout = 60;
+            } else if (checkTimeout > 10) {
+                checkTimeout = 10;
                 Log.Warning("Check timeout too high; adjusted to {interval} seconds", checkTimeout);
             }
 

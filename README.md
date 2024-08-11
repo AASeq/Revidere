@@ -71,13 +71,15 @@ Each member of sequence can contain the following keys:
 * `title`: this key controls the title of the given check for the web interface;
            if value is not present it will default to either check name (if
            available) or check kind
-* `period`: interval between checks; must be between 1 second and 10 minutes
-* `timeout`: timeout for each check; it must be between 1-60 seconds; its value
-             cannot be larger than period
+* `period`: interval between checks; must be between 1 second and 10 minutes;
+            default is 10 seconds
+* `timeout`: timeout for each check; it must be between 10 milliseconds and 10
+             seconds; its value cannot be larger than period; default is 5
+             seconds
 * `success`: number of consecutive successful attempts before a target is
-             considered healthy; must be between 1-10 seconds; default is 3
+             considered healthy; must be between 1-10 seconds; default is 2
 * `failure`: number of consecutive failed attempts before a healthy target is
-             considered healthy; must be between 1-10 seconds; default is 3
+             considered healthy; must be between 1-10 seconds; default is 2
 
 This node is mandatory.
 
