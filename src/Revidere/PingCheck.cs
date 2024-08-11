@@ -7,7 +7,7 @@ using Serilog;
 
 internal sealed class PingCheck : Check {
 
-    internal PingCheck(string kind, string target, string title, string? name, CheckProfile profile)
+    internal PingCheck(string kind, string target, string? title, string? name, CheckProfile profile)
         : base(kind, target, title, name, profile) {
     }
 

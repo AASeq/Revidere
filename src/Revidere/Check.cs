@@ -7,10 +7,10 @@ using Serilog;
 
 internal abstract partial class Check {
 
-    private protected Check(string kind, string target, string title, string? name, CheckProfile profile) {
+    private protected Check(string kind, string target, string? title, string? name, CheckProfile profile) {
         Kind = kind.ToUpperInvariant();  // normalize to upper-case
         Target = target;
-        Title = title;
+        Title = title ?? name ?? kind;
         Name = name;
         CheckProfile = profile ?? throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
     }
@@ -58,16 +58,17 @@ internal abstract partial class Check {
     /// <param name="profile">Check profile.</param>
     /// <exception cref="ArgumentNullException">Name cannot be null. -or- Target URI cannot be null. -or- Profile cannot be null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters.</exception>
-    internal static Check? FromConfigData(string kind, string target, string title, string? name, CheckProfile profile) {
-        if (kind == null) { throw new ArgumentNullException(nameof(target), "Target URI cannot be null."); }
+    internal static Check? FromConfigData(string kind, string target, string? title, string? name, CheckProfile profile) {
+        if (kind == null) { throw new ArgumentNullException(nameof(kind), "Target URI cannot be null."); }
         if (target == null) { throw new ArgumentNullException(nameof(target), "Target URI cannot be null."); }
-        if (title == null) { throw new ArgumentNullException(nameof(target), "Target URI cannot be null."); }
-        if ((name != null) && !NameRegex().IsMatch(name)) { throw new ArgumentOutOfRangeException(nameof(name), "Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters."); }
+        if (name != null) {
+            name = name.Trim();
+            if (!NameRegex().IsMatch(name)) { throw new ArgumentOutOfRangeException(nameof(name), "Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters."); }
+        }
 
         kind = kind.Trim();
         target = target.Trim();
-        title = title.Trim();
-        name = name?.Trim();
+        title = title?.Trim() ?? name ?? kind;
 
         if (kind.Equals("dummy", StringComparison.OrdinalIgnoreCase)) {
             if (!string.IsNullOrEmpty(target)) { Log.Information("Target is not used when kind is dummy"); }

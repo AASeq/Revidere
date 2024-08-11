@@ -1,6 +1,5 @@
 namespace Tests;
 
-using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Revidere;
 
@@ -9,7 +8,7 @@ public class CheckStateTests {
 
     [TestMethod]
     public void Basic() {
-        var test = new Check("dummy", "Dummy", new Uri("dummy://localhost"), new CheckProfile(1, 1));
+        var test = Check.FromConfigData(kind: "dummy", target: "localhost", title: "Dummy", name: null, new CheckProfile(1, 1));
         var state = new CheckState(test);
 
         Assert.AreEqual(null, state.IsHealthy);
@@ -29,7 +28,7 @@ public class CheckStateTests {
 
     [TestMethod]
     public void Default() {
-        var test = new Check("dummy", "Dummy", new Uri("dummy://localhost"), CheckProfile.Default);
+        var test = Check.FromConfigData(kind: "dummy", target: "localhost", title: "Dummy", name: null, CheckProfile.Default);
         var state = new CheckState(test);
 
         Assert.AreEqual(null, state.IsHealthy);

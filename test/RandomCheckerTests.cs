@@ -1,6 +1,5 @@
 namespace Tests;
 
-using System;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Revidere;
@@ -11,19 +10,21 @@ public class RandomCheckerTests {
     [TestMethod]
     public void Basic() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = new RandomChecker(new Uri("random://test"));
+        var test = Check.FromConfigData(kind: "random", target: "test", title: null, name: null, CheckProfile.Default);
 
-        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
+        Assert.IsInstanceOfType(test, typeof(RandomCheck));
 
-        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
-        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken, TimeSpan.Zero));
+        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken));
+
+        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(false, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken));
+        Assert.AreEqual(true, test.CheckIsHealthy(cancelToken));
     }
 
 }

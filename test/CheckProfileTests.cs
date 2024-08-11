@@ -22,7 +22,7 @@ public class CheckProfileTests {
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(0.999), TimeSpan.FromSeconds(5), 3, 3));
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(600.001), TimeSpan.FromSeconds(5), 3, 3));
 
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(0.099), 3, 3));
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(0.009), 3, 3));
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(60.001), 3, 3));
 
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5), 0, 3));

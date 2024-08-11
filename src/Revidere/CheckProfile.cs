@@ -32,7 +32,7 @@ internal sealed class CheckProfile {
     /// <exception cref="ArgumentOutOfRangeException">Period cannot be shorter than 1 second nor longer than 10 minutes. -or- Timeout cannot be shorter than 100 milliseconds nor longer than 1 minute. -or- Count must be between 1 and 10.</exception>
     public CheckProfile(TimeSpan period, TimeSpan timeout, int successCount, int failureCount) {
         if (period.TotalSeconds is < 1 or > 600) { throw new ArgumentOutOfRangeException(nameof(period), "Period cannot be shorter than 1 second nor longer than 10 minutes."); }
-        if (timeout.TotalSeconds is < 0.1 or > 60) { throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout cannot be shorter than 100 milliseconds nor longer than 1 minute."); }
+        if (timeout.TotalSeconds is < 0.01 or > 60) { throw new ArgumentOutOfRangeException(nameof(timeout), "Timeout cannot be shorter than 10 milliseconds nor longer than 1 minute."); }
         if (successCount is < 1 or > 10) { throw new ArgumentOutOfRangeException(nameof(successCount), "Count must be between 1 and 10."); }
         if (failureCount is < 1 or > 10) { throw new ArgumentOutOfRangeException(nameof(failureCount), "Count must be between 1 and 10."); }
 
