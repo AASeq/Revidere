@@ -179,8 +179,21 @@ logging:
 Mappings in this node define logging properties for file output. If not
 specified, default log `level` of `debug` is used.
 
-Key `path` must contain the name of the log file. Automatic rolling interval of
-a day will be applied.
+Key `path` must contain the name of the log file.
+
+Key `interval` defines rolling interval for the file and can be one of the
+following values:
+* `infinite`: no file rolling will occur
+* `year`: file will rollover once a year
+* `month`: file will rollover once a month
+* `day`: file will rollover once a day (default)
+* `hour`: file will rollover once a hour
+* `minute`: file will rollover once a minute
+
+Key `retain` controls how many files will be retained after rollover. Default is
+`7`.
+
+Key `buffered` controls if buffering will be used. Default is `true`.
 
 Example:
 ```yaml
@@ -188,6 +201,8 @@ logging:
   file:
     level: warning
     path:  /var/log/revidere.log
+    interval: hour
+    retain: 24
 ```
 
 
