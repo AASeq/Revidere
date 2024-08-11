@@ -71,31 +71,12 @@ internal static class Logging {
     /// </summary>
     /// <param name="properties">Parsed logging properties.</param>
     public static void SetupConsole(FrozenDictionary<string, string> properties) {
+        var minimumLevel = ParseNullableMinimumLevel(properties, "level", LogEventLevel.Information);
+        if (minimumLevel == null) { return; }  // value was None; skip setup
 
-        if (properties.TryGetValue("level", out string? levelProperty)) {
-            levelProperty = levelProperty.Trim();
-            if ("none".Equals(levelProperty, StringComparison.OrdinalIgnoreCase)) { return; }  // must be None if console is to be suppressed
-            if (!Enum.TryParse<LogEventLevel>(levelProperty, ignoreCase: true, out var minimumLevel)) {
-                minimumLevel = LogEventLevel.Information;
-            }
-            SetupConsole(minimumLevel);
-        } else {  // use default init
-            SetupConsole();
-        }
+        SetupConsole(minimumLevel.Value);
     }
 
-
-    /// <summary>
-    /// Configure logging to file.
-    /// </summary>
-    /// <param name="filePath">File path</param>
-    /// <param name="rollingInterval">Rolling interval.</param>
-    /// <param name="retainCount">Number of files to keep after rolling.</param>
-    /// <param name="useBuffering">If output should be buffered.</param>
-    /// <param name="minimumLevel">Minimum level to use.</param>
-    public static void SetupFile(string filePath, LogEventLevel minimumLevel = LogEventLevel.Debug) {
-        SetupFile(filePath, RollingInterval.Day, retainCount: 7, useBuffering: true, minimumLevel);
-    }
 
     /// <summary>
     /// Configure logging to file.
@@ -143,58 +124,20 @@ internal static class Logging {
     public static void SetupFile(FrozenDictionary<string, string> properties) {
         if (properties.Count == 0) { return; }  // ignore if no properties are defined
 
-        LogEventLevel minimumLevel;
-        if (properties.TryGetValue("level", out string? levelProperty)) {
-            levelProperty = levelProperty.Trim();
-            if ("none".Equals(levelProperty, StringComparison.OrdinalIgnoreCase)) { return; }
-            if (!Enum.TryParse(levelProperty, ignoreCase: true, out minimumLevel)) {
-                if ("info".Equals(levelProperty, StringComparison.OrdinalIgnoreCase)) {
-                    minimumLevel = LogEventLevel.Information;
-                } else {
-                    minimumLevel = LogEventLevel.Debug;
-                }
-            }
-        } else {
-            minimumLevel = LogEventLevel.Debug;
-        }
+        var minimumLevel = ParseNullableMinimumLevel(properties, "level", LogEventLevel.Information);
+        if (minimumLevel == null) { return; }  // value was None; skip setup
 
-        if (!properties.TryGetValue("path", out var filePath)) {
+        var filePath = ParseNullablePath(properties, "path", null);
+        if (filePath == null) {
             var assemblyName = (Assembly.GetEntryAssembly()?.GetName().Name) ?? throw new InvalidOperationException("Cannot determine logging file name.");
             filePath = assemblyName.ToLowerInvariant() + ".log";
         }
 
-        RollingInterval rollingInterval;
-        if (properties.TryGetValue("interval", out string? intervalProperty)) {
-            intervalProperty = intervalProperty.Trim();
-            if (!Enum.TryParse(intervalProperty, ignoreCase: true, out rollingInterval)) {
-                rollingInterval = RollingInterval.Day;
-            }
-        } else {
-            rollingInterval = RollingInterval.Day;
-        }
+        var rollingInterval = ParseInterval(properties, "interval", RollingInterval.Day);
+        var retainCount = ParseRetainCount(properties, "retain", 7);
+        var useBuffering = ParseUseBuffering(properties, "buffered", true);
 
-        if (!properties.TryGetValue("retain", out string? retainProperty) || !int.TryParse(retainProperty, NumberStyles.Integer, CultureInfo.InvariantCulture, out var retainCount)) {
-            retainCount = 7;
-        }
-
-        bool useBuffering;
-        if (properties.TryGetValue("buffered", out string? bufferedProperty)) {
-            if (!bool.TryParse(bufferedProperty, out useBuffering)) {
-                if (int.TryParse(bufferedProperty, NumberStyles.Integer, CultureInfo.InvariantCulture, out var useBufferingInt)) {
-                    useBuffering = (useBufferingInt != 0);
-                } else if ("yes".Equals(bufferedProperty, StringComparison.OrdinalIgnoreCase)) {
-                    useBuffering = true;
-                } else if ("y".Equals(bufferedProperty, StringComparison.OrdinalIgnoreCase)) {
-                    useBuffering = true;
-                } else {
-                    useBuffering = false;
-                }
-            }
-        } else {
-            useBuffering = false;
-        }
-
-        SetupFile(filePath, rollingInterval, retainCount, useBuffering, minimumLevel);
+        SetupFile(filePath, rollingInterval, retainCount, useBuffering, minimumLevel.Value);
     }
 
 
@@ -225,26 +168,15 @@ internal static class Logging {
     /// </summary>
     /// <param name="properties">Parsed logging properties.</param>
     public static void SetupSeq(FrozenDictionary<string, string> properties) {
-        // ()
-
         if (properties.Count == 0) { return; }  // ignore if no properties are defined
 
-        LogEventLevel minimumLevel;
-        if (properties.TryGetValue("level", out string? levelProperty)) {
-            levelProperty = levelProperty.Trim();
-            if ("none".Equals(levelProperty, StringComparison.OrdinalIgnoreCase)) { return; }
-            if (!Enum.TryParse(levelProperty, ignoreCase: true, out minimumLevel)) {
-                minimumLevel = LogEventLevel.Information;
-            }
-        } else {
-            minimumLevel = LogEventLevel.Information;
-        }
+        var minimumLevel = ParseNullableMinimumLevel(properties, "level", LogEventLevel.Information);
+        if (minimumLevel == null) { return; }  // value was None; skip setup
 
-        if (properties.TryGetValue("url", out var url)) {  // URL is defined
-            SetupSeq(new Uri(url), minimumLevel);
-        } else {
-            throw new InvalidOperationException("Cannot determine logging seq URL.");
-        }
+        var serverUrl = ParseNullableServerUrl(properties, "url", null);
+        if (serverUrl == null) { throw new InvalidOperationException("Cannot determine logging seq URL."); }
+
+        SetupSeq(serverUrl, minimumLevel.Value);
     }
 
 
@@ -258,4 +190,74 @@ internal static class Logging {
                      .CreateLogger();
     }
 
+
+    #region Helpers
+
+    private static string? GetPropertyValue(FrozenDictionary<string, string> properties, string key) {
+        return properties.TryGetValue(key, out string? value) ? value.Trim() : null;
+    }
+
+    private static LogEventLevel? ParseNullableMinimumLevel(FrozenDictionary<string, string> properties, string key, LogEventLevel defaultMinimumLevel) {
+        var text = GetPropertyValue(properties, key);
+        if ("none".Equals(text, StringComparison.OrdinalIgnoreCase)) { return null; }
+        if ("info".Equals(text, StringComparison.OrdinalIgnoreCase)) { return LogEventLevel.Information; }
+        if (Enum.TryParse<LogEventLevel>(text, ignoreCase: true, out var parsedLevel)) {
+            return parsedLevel;
+        } else {
+            return defaultMinimumLevel;
+        }
+    }
+
+    private static string? ParseNullablePath(FrozenDictionary<string, string> properties, string key, string? defaultPath) {
+        var text = GetPropertyValue(properties, key);
+        if (text != null) {
+            return text;
+        } else {
+            return defaultPath;
+        }
+    }
+
+    private static RollingInterval ParseInterval(FrozenDictionary<string, string> properties, string key, RollingInterval defaultRollingInterval) {
+        var text = GetPropertyValue(properties, key);
+        if (Enum.TryParse<RollingInterval>(text, ignoreCase: true, out var parsedInterval)) {
+            return parsedInterval;
+        } else {
+            return defaultRollingInterval;
+        }
+    }
+
+    private static int ParseRetainCount(FrozenDictionary<string, string> properties, string key, int defaultRetainCount) {
+        var text = GetPropertyValue(properties, key);
+        if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var retainCount)) {
+            return retainCount;
+        } else {
+            return defaultRetainCount;
+        }
+    }
+
+    private static bool ParseUseBuffering(FrozenDictionary<string, string> properties, string key, bool defaultUseBuffering) {
+        var text = GetPropertyValue(properties, key);
+        if (bool.TryParse(text, out var useBuffering)) {
+            return useBuffering;
+        } else if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var useBufferingInt)) {
+            return (useBufferingInt != 0);
+        } else if ("yes".Equals(text, StringComparison.OrdinalIgnoreCase)) {
+            return true;
+        } else if ("no".Equals(text, StringComparison.OrdinalIgnoreCase)) {
+            return false;
+        } else {
+            return defaultUseBuffering;
+        }
+    }
+
+    private static Uri? ParseNullableServerUrl(FrozenDictionary<string, string> properties, string key, Uri? defaultServerUrl) {
+        var text = GetPropertyValue(properties, key);
+        if (Uri.TryCreate(text, UriKind.Absolute, out var serverUrl)) {
+            return serverUrl;
+        } else {
+            return defaultServerUrl;
+        }
+    }
+
+    #endregion Helpers
 }
