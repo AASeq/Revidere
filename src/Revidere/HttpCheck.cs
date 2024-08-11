@@ -5,18 +5,17 @@ using System.Net.Http;
 using System.Threading;
 using Serilog;
 
-internal class HttpChecker : IChecker {
+internal class HttpCheck : Check {
 
-    public HttpChecker(Uri target) {
-        Target = target;
+    public HttpCheck(string kind, string target, string title, string? name, CheckProfile profile)
+        : base(kind, target, title, name, profile) {
     }
 
-    private readonly Uri Target;
     private static readonly HttpClient HttpClient = new();
 
-    public bool CheckIsHealthy(CancellationToken cancellationToken, TimeSpan timeout) {
+    public override bool CheckIsHealthy(CancellationToken cancellationToken) {
         try {
-            var timeoutCancelSource = new CancellationTokenSource(timeout);
+            var timeoutCancelSource = new CancellationTokenSource(CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);
 
             var request = new HttpRequestMessage(HttpMethod.Get, Target);

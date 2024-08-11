@@ -11,21 +11,21 @@ public class HttpCheckerTests {
     [TestMethod]
     public void Ok() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = new HttpChecker(new Uri("http://example.com"));
+        var test = new HttpCheck(new Uri("http://example.com"));
         Assert.AreEqual(true, test.CheckIsHealthy(cancelToken, TimeSpan.FromSeconds(1)));
     }
 
     [TestMethod]
     public void NokInvalidHost() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = new HttpChecker(new Uri("http://" + Guid.NewGuid().ToString()));
+        var test = new HttpCheck(new Uri("http://" + Guid.NewGuid().ToString()));
         Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.FromSeconds(1)));
     }
 
     [TestMethod]
     public void Timeout() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = new HttpChecker(new Uri("http://aaseq.com"));
+        var test = new HttpCheck(new Uri("http://aaseq.com"));
         Assert.AreEqual(false, test.CheckIsHealthy(cancelToken, TimeSpan.FromMilliseconds(1)));
     }
 

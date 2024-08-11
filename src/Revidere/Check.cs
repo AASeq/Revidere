@@ -2,31 +2,49 @@ namespace Revidere;
 
 using System;
 using System.Text.RegularExpressions;
+using System.Threading;
 
-internal partial class Check {
+internal abstract partial class Check {
 
-    private Check(string kind, string target, string title, string? name, IChecker checker, CheckProfile profile) {
+    private protected Check(string kind, string target, string title, string? name, CheckProfile profile) {
         Kind = kind;
         Target = target;
         Title = title;
         Name = name;
-        Checker = checker;
         CheckProfile = profile ?? throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
     }
 
 
+    /// <summary>
+    /// Gets check kind.
+    /// </summary>
     public string Kind { get; }
+
+    /// <summary>
+    /// Gets check target.
+    /// </summary>
     public string Target { get; }
-    public string? Name { get; }
+
+    /// <summary>
+    /// Get check display title.
+    /// </summary>
     public string Title { get; }
 
     /// <summary>
-    /// Gets the checker for this target.
+    /// Gets check name.
     /// </summary>
-    public IChecker Checker { get; }
+    public string? Name { get; }
 
+    /// <summary>
+    /// Gets check profile.
+    /// </summary>
     public CheckProfile CheckProfile { get; }
 
+    /// <summary>
+    /// Performs a health check.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    public abstract bool CheckIsHealthy(CancellationToken cancellationToken);
 
 
     /// <summary>
@@ -45,15 +63,17 @@ internal partial class Check {
         if (title == null) { throw new ArgumentNullException(nameof(target), "Target URI cannot be null."); }
         if ((name != null) && !NameRegex.IsMatch(name)) { throw new ArgumentOutOfRangeException(nameof(name), "Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters."); }
 
-        IChecker checker = kind switch {
-            "dummy" => new DummyChecker(),
-            "get" => new HttpChecker(new Uri(target)),
-            "ping" => new PingChecker(target),
-            "random" => new RandomChecker(target),
-            _ => throw new NotSupportedException($"Kind '{kind}' is not supported."),
-        };
-
-        return new Check(kind, target, title, name, checker, profile);
+        if (kind.Equals("dummy", StringComparison.OrdinalIgnoreCase)) {
+            return new DummyCheck("dummy", target, title, name, profile);
+        } else if (kind.Equals("get", StringComparison.OrdinalIgnoreCase)) {
+            return new HttpCheck("get", new Uri(target).ToString(), title, name, profile);
+        } else if (kind.Equals("ping", StringComparison.OrdinalIgnoreCase)) {
+            return new PingCheck("ping", target, title, name, profile);
+        } else if (kind.Equals("random", StringComparison.OrdinalIgnoreCase)) {
+            return new RandomCheck("random", target, title, name, profile);
+        } else {
+            throw new NotSupportedException($"Kind '{kind}' is not supported.");
+        }
     }
 
 

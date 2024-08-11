@@ -41,14 +41,13 @@ internal static class CheckerThread {
         while (!cancellationToken.IsCancellationRequested) {
             foreach (var checkState in checkStates) {
                 var check = checkState.Check;
-                var checker = checkState.Check.Checker;
                 var profile = checkState.Check.CheckProfile;
 
                 var lastUpdate = checkState?.LastUpdated ?? DateTimeOffset.MinValue;
                 var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds > profile.Period.TotalSeconds;
 
                 if (shouldCheck) {
-                    var isHealthy = checker.CheckIsHealthy(cancellationToken, profile.Timeout);
+                    var isHealthy = check.CheckIsHealthy(cancellationToken);
                     Log.Verbose("Check for {Check}: {Status}", check, isHealthy ? "healthy" : "unhealthy");
                     checkState!.UpdateCheck(isHealthy);
                     if (cancellationToken.IsCancellationRequested) { break; }
