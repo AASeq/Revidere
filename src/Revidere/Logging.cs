@@ -2,6 +2,7 @@ namespace Revidere;
 
 using System;
 using System.Collections.Frozen;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Serilog;
@@ -29,11 +30,30 @@ internal static class Logging {
         _configuration = GetCurrentConfiguration()
                          .WriteTo
                          .Console(
-                             restrictedToMinimumLevel: minimumLevel,
-                             standardErrorFromLevel: LogEventLevel.Error,
-                             outputTemplate: "{Timestamp:HH:mm:ss.fff} {Level:u1} {Message:lj}{NewLine}{Exception}",
-                             formatProvider: CultureInfo.InvariantCulture,
-                             theme: AnsiConsoleTheme.Code
+                            restrictedToMinimumLevel: minimumLevel,
+                            standardErrorFromLevel: LogEventLevel.Error,
+                            outputTemplate: "{Timestamp:HH:mm:ss.fff} {Level:u1} {Message:lj}{NewLine}{Exception}",
+                            formatProvider: CultureInfo.InvariantCulture,
+                            theme: new SystemConsoleTheme(
+                                new Dictionary<ConsoleThemeStyle, SystemConsoleThemeStyle> {
+                                    [ConsoleThemeStyle.Text] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White },
+                                    [ConsoleThemeStyle.SecondaryText] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Gray },
+                                    [ConsoleThemeStyle.TertiaryText] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.DarkGray },
+                                    [ConsoleThemeStyle.Invalid] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Yellow },
+                                    [ConsoleThemeStyle.Null] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Blue },
+                                    [ConsoleThemeStyle.Name] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Gray },
+                                    [ConsoleThemeStyle.String] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Cyan },
+                                    [ConsoleThemeStyle.Number] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Magenta },
+                                    [ConsoleThemeStyle.Boolean] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Blue },
+                                    [ConsoleThemeStyle.Scalar] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.Magenta },
+
+                                    [ConsoleThemeStyle.LevelVerbose] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White, Background = ConsoleColor.DarkGray },
+                                    [ConsoleThemeStyle.LevelDebug] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White, Background = ConsoleColor.DarkGray  },
+                                    [ConsoleThemeStyle.LevelInformation] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White, Background = ConsoleColor.DarkBlue },
+                                    [ConsoleThemeStyle.LevelWarning] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White, Background = ConsoleColor.Yellow },
+                                    [ConsoleThemeStyle.LevelError] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White, Background = ConsoleColor.Red },
+                                    [ConsoleThemeStyle.LevelFatal] = new SystemConsoleThemeStyle { Foreground = ConsoleColor.White, Background = ConsoleColor.Red },
+                                })
                          );
     }
 
