@@ -9,6 +9,11 @@ internal static class App {
     private static void Main() {
         var config = Configuration.Load();
 
+        if (config.Checks.Count == 0) {
+            Log.Fatal("No checks configured.");
+            return;
+        }
+
         var checkStates = new List<CheckState>();
         foreach (var check in config.Checks) {
             checkStates.Add(new CheckState(check));
