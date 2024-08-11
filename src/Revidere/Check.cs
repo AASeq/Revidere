@@ -1,6 +1,7 @@
 namespace Revidere;
 
 using System;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -82,6 +83,18 @@ internal abstract partial class Check {
     [GeneratedRegex(@"^[a-z0-9-]+$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
     private static partial Regex MyRegex();
 
-
-    override public string ToString() => Title.ToString();
+    /// <summary>
+    /// Returns a string that represents the current object.
+    /// </summary>
+    override public string ToString() {
+        if (!string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Target)) {
+            return $"{Name} {Kind.ToUpper()} {Target}";
+        } else if (!string.IsNullOrEmpty(Name)) {
+            return $"{Name} {Kind.ToUpper()}";
+        } else if (!string.IsNullOrEmpty(Target)) {
+            return $"{Kind.ToUpper()} {Target}";
+        } else {
+            return $"{Kind.ToUpper()}";
+        }
+    }
 }
