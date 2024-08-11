@@ -135,7 +135,7 @@ internal sealed class Configuration {
                 checkTitle ?? checkName ?? checkKind,
                 checkName,
                 new CheckProfile(TimeSpan.FromSeconds(checkPeriod), TimeSpan.FromSeconds(checkTimeout), checkSuccess, checkFailure));
-            checks.Add(check);
+            if (check != null) { checks.Add(check); }
 
             Log.Information("Added check {check}", check);
         }
