@@ -233,7 +233,8 @@ intended for long-term usage.
 
 Health checks can be specified in comma-separated list. Each health check target
 will use its `kind` as a prefix and its `target` as host/path parameters. No
-custom configuration will be available.
+custom configuration will be available and for HTTP checks, only GET method is
+supported.
 
 Example:
 ```env

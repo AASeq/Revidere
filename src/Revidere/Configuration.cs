@@ -141,6 +141,25 @@ internal sealed class Configuration {
         }
 
 
+        // Environment: Checks
+
+        var envCheckTargetUrls = Environment.GetEnvironmentVariable("CHECKS")?.Split(new char[] { ';', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+        foreach (var targetUrl in envCheckTargetUrls) {
+            (var checkKind, var checkTarget) = GetCheckKindAndTarget(targetUrl);
+            if (checkKind == null) {
+                Log.Warning($"Check kind not set for '{targetUrl}'; skipping check");
+                continue;
+            }
+            var check = Check.FromConfigData(
+                checkKind,
+                checkTarget ?? "",
+                title: null,
+                name: null,
+                CheckProfile.Default);
+            if (check != null) { checks.Add(check); }
+        }
+
+
         return new Configuration(webConfiguration, checks);
     }
 
