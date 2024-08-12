@@ -29,8 +29,12 @@ internal static class App {
         WebThread.Start(config.Web, checkStates, source.Token);
         CheckerThread.Start(checkStates, source.Token);
 
+        Log.Information("Started");
+
         source.Token.WaitHandle.WaitOne();
         CheckerThread.Stop();
         WebThread.Stop();
+
+        Log.Information("Stopped");
     }
 }

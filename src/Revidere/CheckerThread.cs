@@ -9,56 +9,56 @@ internal static class CheckerThread {
 
     public static void Start(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting Checker thread");
-        CheckStates = checkStates;
         CancellationToken = cancellationToken;
 
-        Thread = new Thread(Run) {
-            IsBackground = true,
-            Name = "Checker",
-        };
-        Thread.Start();
+        var index = 0;
+        foreach (var checkState in checkStates) {
+            index++;
+            var thread = new Thread(Run) {
+                IsBackground = true,
+                Name = $"Checker#{index}",
+            };
+            thread.Start(checkState);
+            Thread.Sleep(50);  // slow it down a bit
+        }
     }
 
     public static void Stop() {
         Log.Verbose("Stopping Checker thread");
-        Thread?.Join();
+        foreach (var thread in Threads) {
+            thread.Join();
+        }
     }
 
 
-    private static IReadOnlyList<CheckState>? CheckStates;
-
-    private static Thread? Thread;
+    private static readonly IList<Thread> Threads = [];
     private static CancellationToken? CancellationToken;
 
 
-    private static void Run() {
-        Log.Verbose("Started Checker thread");
-
+    private static void Run(object? state) {
+        var checkState = (CheckState)state!;
         var cancellationToken = CancellationToken!.Value;
-        var checkStates = CheckStates!;
 
-        var sleepInterval = Math.Min(Math.Max(1000 / checkStates.Count, 1), 100);  // 1-100ms
+        Log.Debug("Started Checker thread for {Check}", checkState.Check);
+
         while (!cancellationToken.IsCancellationRequested) {
-            foreach (var checkState in checkStates) {
-                var check = checkState.Check;
-                var profile = checkState.Check.CheckProfile;
+            var check = checkState!.Check;
+            var profile = check.CheckProfile;
 
-                var lastUpdate = checkState?.LastUpdated ?? DateTimeOffset.MinValue;
-                var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds > profile.Period.TotalSeconds;
+            var lastUpdate = checkState?.LastUpdated ?? DateTimeOffset.MinValue;
+            var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds > profile.Period.TotalSeconds;
 
-                if (shouldCheck) {
-                    var isHealthy = check.CheckIsHealthy(cancellationToken);
-                    Log.Verbose("Check for {Check}: {Status}", check, isHealthy ? "healthy" : "unhealthy");
-                    checkState!.UpdateCheck(isHealthy);
-                    if (cancellationToken.IsCancellationRequested) { break; }
-                }
-
-                Thread.Sleep(sleepInterval);
+            if (shouldCheck) {
+                var isHealthy = check.CheckIsHealthy(cancellationToken);
+                Log.Debug("Check for {Check}: {Status}", check, isHealthy ? "healthy" : "unhealthy");
+                checkState!.UpdateCheck(isHealthy);
             }
+
+            if (cancellationToken.IsCancellationRequested) { break; }
+            Thread.Sleep(100);
         }
 
-        Log.Verbose("Stopped Checker thread");
+        Log.Verbose("Stopped Checker thread for {Check}", checkState!.Check);
     }
-
 
 }
