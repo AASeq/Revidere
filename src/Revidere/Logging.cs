@@ -127,15 +127,15 @@ internal static class Logging {
         var minimumLevel = ParseNullableMinimumLevel(properties, "level", LogEventLevel.Information);
         if (minimumLevel == null) { return; }  // value was None; skip setup
 
-        var filePath = ParseNullablePath(properties, "path", null);
-        if (filePath == null) {
-            var assemblyName = (Assembly.GetEntryAssembly()?.GetName().Name) ?? throw new InvalidOperationException("Cannot determine logging file name.");
-            filePath = assemblyName.ToLowerInvariant() + ".log";
-        }
-
         var rollingInterval = ParseInterval(properties, "interval", RollingInterval.Day);
         var retainCount = ParseRetainCount(properties, "retain", 7);
         var useBuffering = ParseUseBuffering(properties, "buffered", true);
+
+        var filePath = ParseNullablePath(properties, "path", null);
+        if (filePath == null) {
+            var assemblyName = (Assembly.GetEntryAssembly()?.GetName().Name) ?? throw new InvalidOperationException("Cannot determine logging file name.");
+            filePath = assemblyName.ToLowerInvariant() + (rollingInterval == RollingInterval.Infinite ? ".log" : "..log");
+        }
 
         SetupFile(filePath, rollingInterval, retainCount, useBuffering, minimumLevel.Value);
     }
