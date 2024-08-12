@@ -73,7 +73,12 @@ internal abstract partial class Check {
         if (kind.Equals("dummy", StringComparison.OrdinalIgnoreCase)) {
             if (!string.IsNullOrEmpty(target)) { Log.Information("Target is not used when kind is dummy"); }
             return new DummyCheck(kind, target, title, name, profile);
-        } else if (kind.Equals("get", StringComparison.OrdinalIgnoreCase)) {
+        } else if (kind.Equals("get", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("post", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("put", StringComparison.OrdinalIgnoreCase)
+            || kind.Equals("delete", StringComparison.OrdinalIgnoreCase)) {
             if (Uri.TryCreate(target, UriKind.Absolute, out var uri)) {
                 return new HttpCheck(kind, uri.ToString(), title, name, profile);
             } else {

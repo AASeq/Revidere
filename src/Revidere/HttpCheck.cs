@@ -9,7 +9,19 @@ internal sealed class HttpCheck : Check {
 
     internal HttpCheck(string kind, string target, string title, string? name, CheckProfile profile)
         : base(kind, target, title, name, profile) {
+        Method = Kind switch {
+            "GET" => HttpMethod.Get,
+            "HEAD" => HttpMethod.Head,
+            "POST" => HttpMethod.Post,
+            "PUT" => HttpMethod.Put,
+            "DELETE" => HttpMethod.Delete,
+            _ => throw new ArgumentException($"Invalid HTTP method: {kind}", nameof(kind)),
+        };
+        TargetUrl = new Uri(Target);
     }
+
+    private readonly Uri TargetUrl;
+    private readonly HttpMethod Method;
 
     private static readonly HttpClient HttpClient = new();
 
@@ -18,12 +30,12 @@ internal sealed class HttpCheck : Check {
             var timeoutCancelSource = new CancellationTokenSource(CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);
 
-            var request = new HttpRequestMessage(HttpMethod.Get, Target);
+            var request = new HttpRequestMessage(Method, TargetUrl);
             var response = HttpClient.SendAsync(request, linkedCancelSource.Token).Result;
-            Log.Verbose("HTTP check for {Uri}: {Status}", Target, response.StatusCode);
+            Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, response.StatusCode);
             return response.IsSuccessStatusCode;
         } catch (Exception ex) {
-            Log.Verbose("HTTP check for {Uri}: {Status}", Target, ex);
+            Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, ex);
             return false;
         }
     }

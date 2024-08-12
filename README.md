@@ -89,15 +89,35 @@ This node is mandatory.
 Key `target` is a mandatory and its value must be either hostname or ip that
 ping request will be sent to.
 
+Example:
+```yaml
+- kind: ping
+  target: 1.1.1.1
+```
 
-#### kind: get
+
+#### kind: get/head/post/put/delete
 
 Key `target` is a mandatory and its value must be URL that request is sent to.
+Kind matches the HTTP method to be used.
+
+Example:
+```yaml
+- kind: get
+  target: http://example.com
+- kind: head
+  target: http://example.net
+```
 
 
 ##### kind: dummy
 
 This kind is used for troubleshooting. It always returns true.
+
+Example:
+```yaml
+- kind: dummy
+```
 
 
 ##### kind: random
@@ -107,6 +127,10 @@ This kind is used for troubleshooting. It returns random health check outcomes.
 The same `target` will result in the same random number seed. If target is not
 specified, the current time will be used.
 
+Example:
+```yaml
+- kind: random
+```
 
 
 #### web

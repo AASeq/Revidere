@@ -1,22 +1,31 @@
 checks:
   - 'dummy://'
-  - target: random://A
+  - kind: random
+    target: A
     title: Random A
-  - target: random://B
+  - kind: random
+    target: A
     title: Random B
-  - target: random://
+  - kind: random
     name: random
     title: Random
-  - name: ping
+  - kind: ping
+    target: aaseq.com
+    name: ping
     title: AASeq ping
-    target: ping://aaseq.com
     timeout: 0.1
-  - target: https://aaseq.com
-    title: aaseq.com
+  - kind: get
+    target: https://aaseq.com
+    title: aaseq.com (GET)
     period: 30
     timeout: 0.1
-  - title: Random Health Probe
+  - kind: head
+    target: https://aaseq.com
+    title: aaseq.com (HEAD)
+    period: 30
+  - kind: GET
     target: http://localhost:8089/healthz/random
+    title: Random Health Probe
     success: 3
     failure: 2
 
