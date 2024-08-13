@@ -13,7 +13,7 @@ using YamlDotNet.RepresentationModel;
 internal sealed class YamlConfig {
 
     /// <summary>
-    /// Creates a new instance.
+    /// Returns instance if file is found or null otherwise.
     /// </summary>
     /// <exception cref="FileNotFoundException">No config file found.</exception>
     public static YamlConfig? FromConfigFile() {
