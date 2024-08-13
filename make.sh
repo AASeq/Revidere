@@ -93,7 +93,13 @@ docker() {
                    --no-self-contained                                 \
                    --configuration Release                             \
                    --output "$SCRIPT_DIR/build/docker"                 \
-                   "$PROJECT"
+                   "$PROJECT" || exit 1
+            echo
+
+            VERSION=`cat "$PROJECT" | grep '<Version>.*</Version>' | sed 's/.*<Version>\(.*\)<\/Version>.*/\1/'`
+            if [ "$VERSION" = "0.0.0" ]; then
+                echo "$(tput setaf 11)Version not set.$(tput sgr0)"
+            fi
             echo
         fi
     done
