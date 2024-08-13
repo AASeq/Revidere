@@ -16,18 +16,16 @@ internal sealed class YamlConfig {
     /// Creates a new instance.
     /// </summary>
     /// <exception cref="FileNotFoundException">No config file found.</exception>
-    public YamlConfig() {
+    public static YamlConfig? FromConfigFile() {
         foreach (var filePath in new string[] { "config.yaml", "/config/config.yaml" }) {
             var info = new FileInfo(filePath);
             if (info.Exists) {
-                var yaml = new YamlStream();
-                yaml.Load(new StreamReader(info.OpenRead()));
-                RootNode = (YamlMappingNode)yaml.Documents[0].RootNode;
-                break;
+                return new YamlConfig(info.OpenRead());
             }
         }
-        if (RootNode == null) throw new FileNotFoundException("No config file found.");
+        return null;
     }
+
 
     /// <summary>
     /// Creates a new instance.
@@ -38,6 +36,7 @@ internal sealed class YamlConfig {
         yaml.Load(new StreamReader(stream));
         RootNode = (YamlMappingNode)yaml.Documents[0].RootNode;
     }
+
 
     private readonly YamlMappingNode RootNode;
 
