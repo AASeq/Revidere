@@ -2,12 +2,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using Serilog;
 
 internal static class App {
     private static void Main() {
         var config = Configuration.Load();
+
+        var version = Assembly.GetEntryAssembly()?.GetName().Version;
+        Log.Information("Starting" + (version != null ? $" (version {version.Major:0}.{version.Minor:0}.{version.Build:0})" : ""));
 
         if (config.Checks.Count == 0) {
             Log.Fatal("No checks configured.");
@@ -29,12 +33,10 @@ internal static class App {
         WebThread.Start(config.Web, checkStates, source.Token);
         CheckerThread.Start(checkStates, source.Token);
 
-        Log.Information("Started");
-
         source.Token.WaitHandle.WaitOne();
         CheckerThread.Stop();
         WebThread.Stop();
 
-        Log.Information("Stopped");
+        Log.Information("Done");
     }
 }
