@@ -1,6 +1,6 @@
-## Configuration
+# Configuration
 
-### Configuration File
+## Configuration File
 
 Configuration is contained in `config.yaml`, either in the same directory as
 application or in `/config/config.yaml`.
@@ -44,13 +44,13 @@ logging:
 ```
 
 
-#### checks
+### checks
 
 This is a node containing a sequence. Each sequence member defines one health
 check.
 
 
-##### Common
+#### Common
 
 Each member of sequence can contain the following keys:
 * `kind`: defines kind of health check; must be specified
@@ -75,7 +75,7 @@ Each member of sequence can contain the following keys:
 This node is mandatory.
 
 
-#### kind: ping
+### kind: ping
 
 Key `target` is a mandatory and its value must be either hostname or ip that
 ping request will be sent to.
@@ -87,7 +87,7 @@ Example:
 ```
 
 
-#### kind: get/head/post/put/delete
+### kind: get/head/post/put/delete
 
 Key `target` is a mandatory and its value must be URL that request is sent to.
 Kind matches the HTTP method to be used.
@@ -101,7 +101,7 @@ Example:
 ```
 
 
-##### kind: dummy
+#### kind: dummy
 
 This kind is used for troubleshooting. It always returns true.
 
@@ -111,7 +111,7 @@ Example:
 ```
 
 
-##### kind: random
+#### kind: random
 
 This kind is used for troubleshooting. It returns random health check outcomes.
 
@@ -124,7 +124,7 @@ Example:
 ```
 
 
-#### web
+### web
 
 This node defines mappings for built-in web server. Its usage is optional.
 
@@ -147,14 +147,14 @@ web:
 ```
 
 
-#### logging
+### logging
 
 This is a mapping node defining logging setup.
 
 This node is optional.
 
 
-#### logging (Common)
+### logging (Common)
 
 Each `logging` subnode has `level` key in common.
 
@@ -171,7 +171,7 @@ Note that each level implicitly also includes higher severity levels, e.g. using
 `warning` will print `warning`, `error`, and `panic`.
 
 
-##### logging/console
+#### logging/console
 
 Mappings in this node define logging properties for console output. If there is
 no `console` node, application will default to using `information` console level
@@ -191,7 +191,7 @@ logging:
 ```
 
 
-##### logging/file
+#### logging/file
 
 Mappings in this node define logging properties for file output. If not
 specified, default log `level` of `debug` is used.
@@ -223,7 +223,7 @@ logging:
 ```
 
 
-##### logging/seq
+#### logging/seq
 
 Mappings in this node define logging properties for [seq](https://datalust.co/seq)
 output. If not specified, default log `level` of `info` is used.
@@ -239,12 +239,12 @@ logging:
 ```
 
 
-### Environment Variable
+## Environment Variable
 
 Limited configuration can be done using environment variables. This is not
 intended for long-term usage.
 
-#### CHECKS
+### CHECKS
 
 Health checks can be specified in comma-separated list. Each health check target
 will use its `kind` as a prefix and its `target` as host/path parameters. No
