@@ -8,7 +8,7 @@ if [ "$#" -gt 1 ]; then
 fi
 
 
-clean() {
+make_clean() {
     echo "$(tput setab 5) $(printf '%-10s' 'clean') $(tput setab 13) $(tput el)$(tput sgr0)"
 
     mkdir -p "$SCRIPT_DIR/bin"
@@ -18,7 +18,7 @@ clean() {
     find "$SCRIPT_DIR/build" -mindepth 1 -delete
 }
 
-build() {
+make_build() {
     mkdir -p "$SCRIPT_DIR/build"
 
     find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sort | while IFS= read -r PROJECT; do
@@ -35,7 +35,7 @@ build() {
     done
 }
 
-run() {
+make_run() {
     find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sort | while IFS= read -r PROJECT; do
         IS_EXE=`cat "$PROJECT" | grep -q '<OutputType>.*Exe</OutputType>' && echo 1 || echo 0`
         if [ "$IS_EXE" != "0" ]; then
@@ -48,7 +48,7 @@ run() {
     done
 }
 
-test() {\
+make_test() {
     mkdir -p "$SCRIPT_DIR/bin"
 
     find "$SCRIPT_DIR/test" -type f -name "*.csproj" -print | sort | while IFS= read -r PROJECT; do
@@ -61,7 +61,7 @@ test() {\
     done
 }
 
-release() {
+make_release() {
     mkdir -p "$SCRIPT_DIR/bin"
 
     find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sort | while IFS= read -r PROJECT; do
@@ -80,7 +80,7 @@ release() {
     done
 }
 
-docker() {
+make_docker() {
     mkdir -p "$SCRIPT_DIR/build/docker"
 
     find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sort | while IFS= read -r PROJECT; do
@@ -101,6 +101,17 @@ docker() {
                 echo "$(tput setaf 11)Version not set.$(tput sgr0)"
             fi
             echo
+
+            if [ "$VERSION" != "0.0.0" ]; then
+                DOCKER_REPO=`cat $SCRIPT_DIR/.dockerrepo 2>/dev/null | awk '{print $1}'`
+                if [ "$DOCKER_REPO" != "" ]; then
+                    for TAG in "latest" "$VERSION"; do
+                        docker tag revidere:latest $DOCKER_REPO:$TAG
+                        docker push $DOCKER_REPO:$TAG
+                        echo
+                    done
+                fi
+            fi
         fi
     done
 }
@@ -114,29 +125,29 @@ echo
 
 case $ACTION in
     clean)
-        clean
+        make_clean
     ;;
 
     build)
-        build
+        make_build
     ;;
 
     run)
-        run
+        make_run
     ;;
 
     test)
-        test
+        make_test
     ;;
 
     release)
-        if ! [ -n "$MAKELEVEL" ]; then clean; fi
-        release
+        if ! [ -n "$MAKELEVEL" ]; then make_clean; fi
+        make_release
     ;;
 
     docker)
-        if ! [ -n "$MAKELEVEL" ]; then clean; fi
-        docker
+        if ! [ -n "$MAKELEVEL" ]; then make_clean; fi
+        make_docker
     ;;
 
     *)
