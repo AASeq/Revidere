@@ -146,11 +146,7 @@ internal sealed class Configuration {
         } else {  // default console
             Logging.SetupConsole();
             Logging.Init();
-        }
-
-        if (webConfiguration == null) {
-            webConfiguration = new WebConfiguration("http://*:8089/", "Revidere", 5);
-            Log.Warning("Web configuration not set; using defaults");
+            Log.Warning("Configuration file not found; using defaults");
         }
 
 
