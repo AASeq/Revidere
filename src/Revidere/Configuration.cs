@@ -140,7 +140,7 @@ internal sealed class Configuration {
                     new CheckProfile(TimeSpan.FromSeconds(checkPeriod), TimeSpan.FromSeconds(checkTimeout), checkSuccess, checkFailure));
                 if (check != null) { checks.Add(check); }
 
-                Log.Information("Added check {check}", check);
+                Log.Information("Configured check {check}", check);
             }
 
         } else {  // default console
@@ -166,6 +166,7 @@ internal sealed class Configuration {
                 name: null,
                 CheckProfile.Default);
             if (check != null) { checks.Add(check); }
+            Log.Information("Configured check {check}", check);
         }
 
 
