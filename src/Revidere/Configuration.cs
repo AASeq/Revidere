@@ -38,25 +38,12 @@ internal sealed class Configuration {
 
             var webConfig = config.GetProperties("web");
 
-            webConfig.TryGetValue("prefix", out var webPrefix);
+            var webPrefix = ParseString(webConfig, "prefix", WebConfiguration.Default.Prefix);
             if (string.IsNullOrEmpty(webPrefix)) { webPrefix = WebConfiguration.Default.Prefix; }
             if (!webPrefix.EndsWith('/')) { webPrefix += "/"; }  // prefix must end with a trailing slash
 
-            webConfig.TryGetValue("title", out var webTitle);
-            webTitle ??= WebConfiguration.Default.Title;
-
-            webConfig.TryGetValue("refresh", out var webRefreshText);
-            int.TryParse(webRefreshText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var webRefresh);
-            if (webRefresh == 0) {
-                webRefresh = WebConfiguration.Default.RefreshInterval;  // default
-                if (webRefreshText != null) { Log.Warning("Web refresh interval too low; adjusted to {interval} seconds", webRefresh); }
-            } else if (webRefresh < 5) {
-                webRefresh = 5;
-                Log.Warning("Web refresh interval too low; adjusted to {interval} seconds", webRefresh);
-            } else if (webRefresh > 60) {
-                webRefresh = 60;
-                Log.Warning("Web refresh interval too high; adjusted to {interval} seconds", webRefresh);
-            }
+            var webTitle = ParseString(webConfig, "title", WebConfiguration.Default.Title);
+            var webRefresh = ParseInteger(webConfig, "refresh", 5, 60, WebConfiguration.Default.RefreshInterval);
 
             webConfiguration = new WebConfiguration(webPrefix, webTitle, webRefresh);
 
@@ -81,58 +68,10 @@ internal sealed class Configuration {
                     continue;
                 }
 
-                checkConfig.TryGetValue("period", out var checkPeriodText);
-                double.TryParse(checkPeriodText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkPeriod);
-                if (checkPeriod == 0) {
-                    checkPeriod = CheckProfile.Default.Period.TotalSeconds;  // default
-                    if (checkPeriodText != null) { Log.Information("Check period using default of {interval} seconds", checkPeriod); }
-                } else if (checkPeriod < 1) {
-                    checkPeriod = 1;
-                    Log.Warning("Check period too low; adjusted to {interval} seconds", checkPeriod);
-                } else if (checkPeriod > 600) {
-                    checkPeriod = 600;
-                    Log.Warning("Check period too high; adjusted to {interval} seconds", checkPeriod);
-                }
-
-                checkConfig.TryGetValue("timeout", out var checkTimeoutText);
-                double.TryParse(checkTimeoutText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkTimeout);
-                if (checkTimeout == 0) {
-                    checkTimeout = CheckProfile.Default.Timeout.TotalSeconds;  // default
-                    if (checkTimeoutText != null) { Log.Information("Check timeout using default of {interval} seconds", checkTimeout); }
-                } else if (checkTimeout < 0.01) {
-                    checkTimeout = 0.01;
-                    Log.Warning("Check timeout too low; adjusted to {interval} seconds", checkTimeout);
-                } else if (checkTimeout > 10) {
-                    checkTimeout = 10;
-                    Log.Warning("Check timeout too high; adjusted to {interval} seconds", checkTimeout);
-                }
-
-                checkConfig.TryGetValue("success", out var checkSuccessText);
-                int.TryParse(checkSuccessText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkSuccess);
-                if (checkSuccess == 0) {
-                    checkSuccess = CheckProfile.Default.SuccessCount;  // default
-                    if (checkSuccessText != null) { Log.Information("Check success count using default of {count}", checkSuccess); }
-                } else if (checkSuccess < 1) {
-                    checkSuccess = 1;
-                    Log.Warning("Check success count too low; adjusted to {count}", checkSuccess);
-                } else if (checkSuccess > 10) {
-                    checkSuccess = 10;
-                    Log.Warning("Check success count too high; adjusted to {count}", checkSuccess);
-                }
-
-                checkConfig.TryGetValue("failure", out var checkFailureText);
-                int.TryParse(checkFailureText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var checkFailure);
-                if (checkFailure == 0) {
-                    checkFailure = CheckProfile.Default.FailureCount;  // default
-                    if (checkFailureText != null) { Log.Information("Check success count using default of {count}", checkFailure); }
-                } else if (checkFailure < 1) {
-                    checkFailure = 1;
-                    Log.Warning("Check failure count too low; adjusted to {count}", checkFailure);
-                } else if (checkFailure > 10) {
-                    checkFailure = 10;
-                    Log.Warning("Check failure count too high; adjusted to {count}", checkFailure);
-                }
-
+                var checkPeriod = TimeSpan.FromSeconds(ParseDouble(checkConfig, "period", 1, 60, CheckProfile.Default.Timeout.TotalSeconds));
+                var checkTimeout = TimeSpan.FromSeconds(ParseDouble(checkConfig, "timeout", 0.01, 10, CheckProfile.Default.Timeout.TotalSeconds));
+                var checkSuccess = ParseInteger(checkConfig, "success", 1, 10, CheckProfile.Default.SuccessCount);
+                var checkFailure = ParseInteger(checkConfig, "failure", 1, 10, CheckProfile.Default.FailureCount);
                 var isVisible = ParseBool(checkConfig, "visible", true);
 
                 var check = Check.FromConfigData(
@@ -141,7 +80,7 @@ internal sealed class Configuration {
                     checkTitle ?? checkName ?? checkKind,
                     checkName,
                     isVisible,
-                new CheckProfile(TimeSpan.FromSeconds(checkPeriod), TimeSpan.FromSeconds(checkTimeout), checkSuccess, checkFailure));
+                new CheckProfile(checkPeriod, checkTimeout, checkSuccess, checkFailure));
                 if (check != null) { checks.Add(check); }
 
                 Log.Information("Configured check {check}", check);
@@ -203,6 +142,42 @@ internal sealed class Configuration {
         }
     }
 
+    private static int ParseInteger(FrozenDictionary<string, string> checkConfig, string key, int minValue, int maxValue, int defaultValue) {
+        checkConfig.TryGetValue(key, out var valueText);
+        int.TryParse(valueText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value);
+        if (value == 0) {
+            if (valueText != null) { Log.Information("Check " + key + " count using default of {count}", defaultValue); }
+            return defaultValue;
+        } else if (value < minValue) {
+            value = minValue;
+            Log.Warning("Check " + key + " count too low; adjusted to {count}", value);
+        } else if (value > maxValue) {
+            value = maxValue;
+            Log.Warning("Check " + key + " count too high; adjusted to {count}", value);
+        }
+        return value;
+    }
+
+    private static double ParseDouble(FrozenDictionary<string, string> checkConfig, string key, double minValue, double maxValue, double defaultValue) {
+        checkConfig.TryGetValue(key, out var valueText);
+        double.TryParse(valueText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value);
+        if (value == 0) {
+            if (valueText != null) { Log.Information("Check " + key + " count using default of {count}", defaultValue); }
+            value = defaultValue;
+        } else if (value < minValue) {
+            value = minValue;
+            Log.Warning("Check " + key + " count too low; adjusted to {count}", value);
+        } else if (value > maxValue) {
+            value = maxValue;
+            Log.Warning("Check " + key + " count too high; adjusted to {count}", value);
+        }
+        return value;
+    }
+
+    private static string ParseString(FrozenDictionary<string, string> checkConfig, string key, string defaultValue) {
+        checkConfig.TryGetValue(key, out var valueText);
+        return valueText ?? defaultValue;
+    }
 }
 
 
