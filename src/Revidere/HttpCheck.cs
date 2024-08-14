@@ -7,8 +7,8 @@ using Serilog;
 
 internal sealed class HttpCheck : Check {
 
-    internal HttpCheck(string kind, string target, string title, string? name, bool isVisible, CheckProfile profile)
-        : base(kind, target, title, name, isVisible, profile) {
+    internal HttpCheck(string kind, string target, string title, string? name, bool isVisible, bool isBreak, CheckProfile profile)
+        : base(kind, target, title, name, isVisible, isBreak, profile) {
         Method = Kind switch {
             "GET" => HttpMethod.Get,
             "HEAD" => HttpMethod.Head,

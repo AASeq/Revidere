@@ -29,7 +29,9 @@ internal static class Html {
             var sb = new StringBuilder();
             sb.AppendLine("    " + """<div class="container">""");
             foreach (var checkState in checkStates) {
-                if (checkState.Check.IsVisible == false) { continue; }
+                var check = checkState.Check;
+                if (check.IsVisible == false) { continue; }
+
                 sb.AppendLine(checkState.IsHealthy switch {
                     true => $"""        <div class="ok">""",
                     false => $"""        <div class="nok">""",
@@ -46,8 +48,13 @@ internal static class Html {
                 }
                 sb.AppendLine("""            </div>""");
                 sb.AppendLine("""        </div>""");
+
+                if (check.IsBreak) {
+                    sb.AppendLine("""    </div>""");
+                    sb.AppendLine("    " + """<div class="container">""");
+                }
             }
-            sb.AppendLine("""    </div""");
+            sb.AppendLine("""    </div>""");
 
             content.Replace("<!--{{CONTENT}}-->", sb.ToString());
 

@@ -73,6 +73,7 @@ internal sealed class Configuration {
                 var checkSuccess = ParseInteger(checkConfig, "success", 1, 10, CheckProfile.Default.SuccessCount);
                 var checkFailure = ParseInteger(checkConfig, "failure", 1, 10, CheckProfile.Default.FailureCount);
                 var isVisible = ParseBool(checkConfig, "visible", true);
+                var isBreak = ParseBool(checkConfig, "break", false);
 
                 var check = Check.FromConfigData(
                     checkKind,
@@ -80,6 +81,7 @@ internal sealed class Configuration {
                     checkTitle ?? checkName ?? checkKind,
                     checkName,
                     isVisible,
+                    isBreak,
                 new CheckProfile(checkPeriod, checkTimeout, checkSuccess, checkFailure));
                 if (check != null) { checks.Add(check); }
 
@@ -108,6 +110,7 @@ internal sealed class Configuration {
                 title: null,
                 name: null,
                 isVisible: true,
+                isBreak: false,
                 CheckProfile.Default);
             if (check != null) { checks.Add(check); }
             Log.Information("Configured check {check}", check);

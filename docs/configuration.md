@@ -53,17 +53,17 @@ check.
 #### Common
 
 Each member of sequence can contain the following keys:
-* `kind`: defines kind of health check; must be specified
-* `target`: defines target of a check; the exact syntax depends on the check
-            kind
-* `name`: controls the name of check when using `healthz` path; each name must
-          be unique and consists only of letter, number, dash (-), and
-          underscore (_) characters
-* `title`: this key controls the title of the given check for the web interface;
-           if value is not present it will default to either check name (if
-           available) or check kind
-* `period`: interval between checks; must be between 1 second and 10 minutes;
-            default is 10 seconds
+* `kind`:    defines kind of health check; must be specified
+* `target`:  defines target of a check; the exact syntax depends on the check
+             kind
+* `name`:    controls the name of check when using `healthz` path; each name must
+             be unique and consists only of letter, number, dash (-), and
+             underscore (_) characters
+* `title`:   this key controls the title of the given check for the web
+             interface; if value is not present it will default to either check
+             name (if available) or check kind
+* `period`:  interval between checks; must be between 1 second and 10 minutes;
+             default is 10 seconds
 * `timeout`: timeout for each check; it must be between 10 milliseconds and 10
              seconds; its value cannot be larger than period; default is 5
              seconds
@@ -72,6 +72,7 @@ Each member of sequence can contain the following keys:
 * `failure`: number of consecutive failed attempts before a healthy target is
              considered healthy; must be between 1-10 seconds; default is 2
 * `visible`: if set to false, check will not be visible in GUI; default is true
+* `break`:   if set to true, a new line will start after it
 
 This node is mandatory.
 

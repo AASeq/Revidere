@@ -20,6 +20,7 @@ checks:
     title: aaseq.com (GET)
     period: 30
     timeout: 0.1
+    break: true
   - kind: head
     target: https://aaseq.com
     title: aaseq.com (HEAD)
