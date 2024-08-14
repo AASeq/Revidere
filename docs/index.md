@@ -21,6 +21,15 @@ Please note this is a simplified version and for the full configuration you need
 to use `/config/config.yaml` file.
 
 
+## Docker: COnfiguration File
+
+To fully customize Revidere, it's necessary to use config file.
+
+```bash
+docker run -d -p 8089:8089 -v /home/user/config.yaml:/config/config.yaml --restart always --name revidere aaseq/revidere:latest
+```
+
+
 ## Other
 
 For more information, check [documentation](https://aaseq.com/revidere/).

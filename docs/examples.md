@@ -107,3 +107,29 @@ web:
 ```
 
 No exact equivalent when using just an environment variable.
+
+
+## More Expansive Logging
+
+Increases log level for console to debug and file log level to verbose.
+
+```yaml
+logging:
+  console: debug
+  file:
+    - level: verbose
+    - path: /var/tmp/revidere.log
+```
+
+
+## Seq Logging
+
+Log all information to seq in addition to console.
+
+```yaml
+logging:
+  console: info
+  seq:
+    - level: info
+    - url: http://localhost:5341
+```
