@@ -71,6 +71,7 @@ Each member of sequence can contain the following keys:
              considered healthy; must be between 1-10 seconds; default is 2
 * `failure`: number of consecutive failed attempts before a healthy target is
              considered healthy; must be between 1-10 seconds; default is 2
+* `visible`: if set to false, check will not be visible in GUI; default is true
 
 This node is mandatory.
 

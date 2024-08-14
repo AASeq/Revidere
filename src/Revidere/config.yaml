@@ -9,6 +9,7 @@ checks:
   - kind: random
     name: random
     title: Random
+    visible: false
   - kind: ping
     target: aaseq.com
     name: ping

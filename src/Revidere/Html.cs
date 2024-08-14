@@ -29,6 +29,7 @@ internal static class Html {
             var sb = new StringBuilder();
             sb.AppendLine("    " + """<div class="container">""");
             foreach (var checkState in checkStates) {
+                if (checkState.Check.IsVisible == false) { continue; }
                 sb.AppendLine(checkState.IsHealthy switch {
                     true => $"""        <div class="ok">""",
                     false => $"""        <div class="nok">""",

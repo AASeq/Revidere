@@ -7,8 +7,8 @@ using Serilog;
 
 internal sealed class PingCheck : Check {
 
-    internal PingCheck(string kind, string target, string? title, string? name, CheckProfile profile)
-        : base(kind, target, title, name, profile) {
+    internal PingCheck(string kind, string target, string? title, string? name, bool isVisible, CheckProfile profile)
+        : base(kind, target, title, name, isVisible, profile) {
     }
 
     public override bool CheckIsHealthy(CancellationToken cancellationToken) {

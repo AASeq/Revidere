@@ -7,11 +7,12 @@ using Serilog;
 
 internal abstract partial class Check {
 
-    private protected Check(string kind, string target, string? title, string? name, CheckProfile profile) {
+    private protected Check(string kind, string target, string? title, string? name, bool isVisible, CheckProfile profile) {
         Kind = kind.ToUpperInvariant();  // normalize to upper-case
         Target = target;
         Title = title ?? name ?? kind;
         Name = name;
+        IsVisible = isVisible;
         CheckProfile = profile ?? throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
     }
 
@@ -37,6 +38,11 @@ internal abstract partial class Check {
     public string? Name { get; }
 
     /// <summary>
+    /// Gets if check is to be made visible.
+    /// </summary>
+    public bool IsVisible { get; }
+
+    /// <summary>
     /// Gets check profile.
     /// </summary>
     public CheckProfile CheckProfile { get; }
@@ -58,7 +64,7 @@ internal abstract partial class Check {
     /// <param name="profile">Check profile.</param>
     /// <exception cref="ArgumentNullException">Name cannot be null. -or- Target URI cannot be null. -or- Profile cannot be null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters.</exception>
-    internal static Check? FromConfigData(string kind, string target, string? title, string? name, CheckProfile profile) {
+    internal static Check? FromConfigData(string kind, string target, string? title, string? name, bool isVisible, CheckProfile profile) {
         if (kind == null) { throw new ArgumentNullException(nameof(kind), "Target URI cannot be null."); }
         if (target == null) { throw new ArgumentNullException(nameof(target), "Target URI cannot be null."); }
         if (name != null) {
@@ -72,7 +78,7 @@ internal abstract partial class Check {
 
         if (kind.Equals("dummy", StringComparison.OrdinalIgnoreCase)) {
             if (!string.IsNullOrEmpty(target)) { Log.Information("Target is not used when kind is dummy"); }
-            return new DummyCheck(kind, target, title, name, profile);
+            return new DummyCheck(kind, target, title, name, isVisible, profile);
         } else if (kind.Equals("get", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
@@ -80,20 +86,20 @@ internal abstract partial class Check {
             || kind.Equals("put", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("delete", StringComparison.OrdinalIgnoreCase)) {
             if (Uri.TryCreate(target, UriKind.Absolute, out var uri)) {
-                return new HttpCheck(kind, uri.ToString(), title, name, profile);
+                return new HttpCheck(kind, uri.ToString(), title, name, isVisible, profile);
             } else {
                 if (!string.IsNullOrEmpty(target)) { Log.Warning($"Cannot parse target URL '{target}'"); }
                 return null;
             }
         } else if (kind.Equals("ping", StringComparison.OrdinalIgnoreCase)) {
             if (IPAddressRegex().IsMatch(target) || HostRegex().IsMatch(target)) {
-                return new PingCheck(kind, target, title, name, profile);
+                return new PingCheck(kind, target, title, name, isVisible, profile);
             } else {
                 if (!string.IsNullOrEmpty(target)) { Log.Warning($"Cannot parse '{target} as hostname or IP address'"); }
                 return null;
             }
         } else if (kind.Equals("random", StringComparison.OrdinalIgnoreCase)) {
-            return new RandomCheck(kind, target, title, name, profile);
+            return new RandomCheck(kind, target, title, name, isVisible, profile);
         } else {
             if (!string.IsNullOrEmpty(target)) { Log.Warning($"Unrecognized check kind '{kind}'"); }
             return null;

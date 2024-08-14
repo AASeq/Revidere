@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Globalization;
 using Serilog;
@@ -132,12 +133,15 @@ internal sealed class Configuration {
                     Log.Warning("Check failure count too high; adjusted to {count}", checkFailure);
                 }
 
+                var isVisible = ParseBool(checkConfig, "visible", true);
+
                 var check = Check.FromConfigData(
                     checkKind,
                     checkTarget ?? "",
                     checkTitle ?? checkName ?? checkKind,
                     checkName,
-                    new CheckProfile(TimeSpan.FromSeconds(checkPeriod), TimeSpan.FromSeconds(checkTimeout), checkSuccess, checkFailure));
+                    isVisible,
+                new CheckProfile(TimeSpan.FromSeconds(checkPeriod), TimeSpan.FromSeconds(checkTimeout), checkSuccess, checkFailure));
                 if (check != null) { checks.Add(check); }
 
                 Log.Information("Configured check {check}", check);
@@ -164,6 +168,7 @@ internal sealed class Configuration {
                 checkTarget ?? "",
                 title: null,
                 name: null,
+                isVisible: true,
                 CheckProfile.Default);
             if (check != null) { checks.Add(check); }
             Log.Information("Configured check {check}", check);
@@ -188,6 +193,16 @@ internal sealed class Configuration {
             return (scheme, rest);
         }
     }
+
+    private static bool ParseBool(FrozenDictionary<string, string> checkConfig, string key, bool defaultValue) {
+        checkConfig.TryGetValue(key, out var valueText);
+        if (bool.TryParse(valueText, out var value)) {
+            return value;
+        } else {
+            return defaultValue;
+        }
+    }
+
 }
 
 
