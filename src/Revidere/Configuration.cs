@@ -112,9 +112,10 @@ internal sealed class Configuration {
                 Log.Warning($"Check kind not set for '{targetUrl}'; skipping check");
                 continue;
             }
+
             var check = Check.FromProperties(new CheckProperties(
                 checkKind,
-                checkTarget ?? "",
+                checkTarget,
                 null,  // Title
                 null,  // Name
                 true,  // Visible

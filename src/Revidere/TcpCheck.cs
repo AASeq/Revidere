@@ -30,20 +30,20 @@ internal sealed class TcpCheck : Check {
 
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         try {
-            var timeoutCancelSource = new CancellationTokenSource(CheckProfile.Timeout);
+            var timeoutCancelSource = new CancellationTokenSource(Properties.CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);
 
             using var client = new TcpClient();
             var connectTask = client.ConnectAsync(Host, Port, linkedCancelSource.Token);
             connectTask.ConfigureAwait(false).GetAwaiter().GetResult();
 
-            Log.Verbose("TCP {Host} status: {Status}", Target, "Fail");
+            Log.Verbose("{Check} status: {Status}", this, "Healthy");
             return true;
         } catch (OperationCanceledException) {
-            Log.Verbose("TCP {Host} status: {Status}", Target, "Timeout");
+            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", "Timeout");
             return false;
         } catch (Exception ex) {
-            Log.Verbose("TCP {Host} error: {Exception}", Target, ex);
+            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", ex.Message);
             return false;
         }
     }

@@ -81,8 +81,8 @@ internal static class HealthZ {
         if (includeTimestamp) { jsonWriter.WriteString("timestamp", DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ssZ")); }
 
         if (checkState != null) {
-            if (checkState.Check.Name != null) { jsonWriter.WriteString("name", checkState.Check.Name); }
-            if (!string.IsNullOrEmpty(checkState.Check.Title)) { jsonWriter.WriteString("title", checkState.Check.Title); }
+            if (checkState.Check.Properties.Name != null) { jsonWriter.WriteString("name", checkState.Check.Properties.Name); }
+            if (!string.IsNullOrEmpty(checkState.Check.Properties.Title)) { jsonWriter.WriteString("title", checkState.Check.Properties.Title); }
             if (checkState.LastChanged != null) { jsonWriter.WriteString("since", checkState.LastChanged.Value.ToString("yyyy-MM-ddTHH:mm:ssZ")); }
             if ((checkState.LastChanged != null) && (checkState.IsHealthy == true)) { jsonWriter.WriteString("uptime", GetUpTimeText(DateTimeOffset.Now - checkState.LastChanged.Value)); }
             if ((checkState.LastChanged != null) && (checkState.IsHealthy == false)) { jsonWriter.WriteString("downtime", GetUpTimeText(DateTimeOffset.Now - checkState.LastChanged.Value)); }

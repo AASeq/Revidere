@@ -45,7 +45,7 @@ internal static class CheckerThread {
 
         while (!cancellationToken.IsCancellationRequested) {
             var check = checkState!.Check;
-            var profile = check.CheckProfile;
+            var profile = check.Properties.CheckProfile;
 
             var lastUpdate = checkState?.LastUpdated ?? DateTimeOffset.MinValue;
             var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds > profile.Period.TotalSeconds;

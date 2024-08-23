@@ -11,7 +11,7 @@ internal sealed class HttpCheck : Check {
     internal HttpCheck(CheckProperties checkProperties)
         : base(checkProperties) {
 
-        Method = Kind switch {
+        Method = checkProperties.Kind switch {
             "GET" => HttpMethod.Get,
             "HEAD" => HttpMethod.Head,
             "POST" => HttpMethod.Post,
@@ -20,7 +20,7 @@ internal sealed class HttpCheck : Check {
             _ => throw new ArgumentException($"Invalid HTTP method: {checkProperties.Kind}", nameof(checkProperties)),
         };
 
-        TargetUrl = new Uri(Target);
+        TargetUrl = new Uri(checkProperties.Target);
     }
 
     private readonly Uri TargetUrl;
@@ -31,18 +31,22 @@ internal sealed class HttpCheck : Check {
 
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         try {
-            var timeoutCancelSource = new CancellationTokenSource(CheckProfile.Timeout);
+            var timeoutCancelSource = new CancellationTokenSource(Properties.CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);
 
             var request = new HttpRequestMessage(Method, TargetUrl);
             var response = HttpClient.SendAsync(request, linkedCancelSource.Token).Result;
-            Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, response.StatusCode);
-            return response.IsSuccessStatusCode;
+            var isHealthy = response.IsSuccessStatusCode;
+            Log.Verbose("{Check} status: {Status} ({Code})", this, isHealthy ? "Healthy" : "Unhealthy", (int)response.StatusCode);
+            return isHealthy;
+        } catch (OperationCanceledException) {
+            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", "Timeout");
+            return false;
         } catch (Exception ex) {
             if (ex.InnerException is HttpRequestException hrex) {
-                Log.Debug("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, hrex.Message);
+                Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", hrex.Message);
             } else {
-                Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, ex);
+                Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", ex.Message);
             }
             return false;
         }

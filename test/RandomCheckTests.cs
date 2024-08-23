@@ -10,16 +10,7 @@ public class RandomCheckTests {
     [TestMethod]
     public void RandomCheck_Basic() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = Check.FromProperties(new CheckProperties(
-            "random",
-            "test",
-            null,
-            null,
-            false,
-            false,
-            null,
-            CheckProfile.Default)
-        );
+        var test = Check.FromProperties(Helpers.GetProperties("random", "test"));
 
         Assert.IsInstanceOfType(test, typeof(RandomCheck));
 

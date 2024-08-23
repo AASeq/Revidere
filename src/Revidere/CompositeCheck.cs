@@ -24,14 +24,14 @@ internal sealed class CompositeCheck : Check {
         var totalCount = 0;
 
         foreach (var checkState in checkStates) {
-            if ((checkState.Check.Name == null) || !CheckNames.ContainsKey(checkState.Check.Name)) { continue; }
+            if ((checkState.Check.Properties.Name == null) || !CheckNames.ContainsKey(checkState.Check.Properties.Name)) { continue; }
 
             totalCount++;
             if (checkState.IsHealthy == true) { healthyCount++; }
         }
 
-        var isHelthy = (totalCount > 0) && ((healthyCount * 100 / totalCount) >= (Percent ?? 100));
-        Log.Verbose("COMPOSITE status: {Status} ({Healthy}/{Total})", isHelthy ? "Healthy" : "Unhealthy", healthyCount, totalCount);
+        var isHelthy = (totalCount > 0) && ((healthyCount * 100 / totalCount) >= (Properties.PercentThreshold ?? 100));
+        Log.Verbose("{Check} status: {Status} ({Healthy}/{Total})", this, isHelthy ? "Healthy" : "Unhealthy", healthyCount, totalCount);
 
         return isHelthy;
     }

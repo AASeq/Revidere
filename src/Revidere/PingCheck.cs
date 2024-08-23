@@ -20,11 +20,12 @@ internal sealed class PingCheck : Check {
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         try {
             var pingSender = new Ping();
-            PingReply reply = pingSender.Send(Host, (int)CheckProfile.Timeout.TotalMilliseconds);
-            Log.Verbose("Ping {Host} status: {Status}", Host, reply.Status);
-            return (reply.Status == IPStatus.Success);
+            PingReply reply = pingSender.Send(Host, (int)Properties.CheckProfile.Timeout.TotalMilliseconds);
+            var isHealthy = (reply.Status == IPStatus.Success);
+            Log.Verbose("{Check} status: {Status} ({Code})", this, isHealthy ? "Healthy" : "Unhealthy", reply.Status);
+            return isHealthy;
         } catch (Exception ex) {
-            Log.Verbose("Ping {Host} error: {Exception}", Host, ex);
+            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", ex.Message);
             return false;
         }
     }

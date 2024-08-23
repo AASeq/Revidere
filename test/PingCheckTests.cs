@@ -11,16 +11,7 @@ public class PingCheckTests {
     [TestMethod]
     public void PingCheck_Ok() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = Check.FromProperties(new CheckProperties(
-            "ping",
-            "127.0.0.1",
-            null,
-            null,
-            false,
-            false,
-            null,
-            CheckProfile.Default)
-        );
+        var test = Check.FromProperties(Helpers.GetProperties("ping", "127.0.0.1"));
         Assert.IsInstanceOfType(test, typeof(PingCheck));
         Assert.AreEqual(true, test.CheckIsHealthy([], cancelToken));
     }
@@ -28,46 +19,21 @@ public class PingCheckTests {
     [TestMethod]
     public void PingCheck_NokUnpingable() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = Check.FromProperties(new CheckProperties(
-            "ping",
-            "255.255.255.255",
-            null,
-            null,
-            false,
-            false,
-            null,
-            CheckProfile.Default)
-        );
+        var test = Check.FromProperties(Helpers.GetProperties("ping", "255.255.255.255"));
         Assert.IsInstanceOfType(test, typeof(PingCheck));
         Assert.AreEqual(false, test.CheckIsHealthy([], cancelToken));
     }
 
     [TestMethod]
     public void PingCheck_EmptyHostNotWorking() {
-        var test = Check.FromProperties(new CheckProperties(
-            "ping",
-            "",
-            null,
-            null,
-            false,
-            false,
-            null,
-            CheckProfile.Default)
-        );
+        var test = Check.FromProperties(Helpers.GetProperties("ping", ""));
         Assert.IsNull(test);
     }
 
     [TestMethod]
     public void PingCheck_Timeout() {
         var cancelToken = new CancellationTokenSource().Token;
-        var test = Check.FromProperties(new CheckProperties(
-            "ping",
-            "aaseq.com",
-            null,
-            null,
-            false,
-            false,
-            null,
+        var test = Check.FromProperties(Helpers.GetProperties("ping", "aaseq.com",
             new CheckProfile(TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(10), 1, 1))
         );
         Assert.IsInstanceOfType(test, typeof(PingCheck));

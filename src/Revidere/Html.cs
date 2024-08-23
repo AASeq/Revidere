@@ -30,14 +30,14 @@ internal static class Html {
             sb.AppendLine("    " + """<div class="container">""");
             foreach (var checkState in checkStates) {
                 var check = checkState.Check;
-                if (check.IsVisible == false) { continue; }
+                if (check.Properties.IsVisible == false) { continue; }
 
                 sb.AppendLine(checkState.IsHealthy switch {
                     true => $"""        <div class="ok">""",
                     false => $"""        <div class="nok">""",
                     _ => $"""        <div class="pending">""",
                 });
-                sb.AppendLine($"""            <div class="title">{checkState.Check.Title}</div>""");
+                sb.AppendLine($"""            <div class="title">{checkState.Check.Properties.Title}</div>""");
                 sb.AppendLine("""            <div class="semaphore"></div>""");
                 sb.AppendLine("""            <div class="history">""");
                 var i = 0;
@@ -49,7 +49,7 @@ internal static class Html {
                 sb.AppendLine("""            </div>""");
                 sb.AppendLine("""        </div>""");
 
-                if (check.IsBreak) {
+                if (check.Properties.IsBreak) {
                     sb.AppendLine("""    </div>""");
                     sb.AppendLine("    " + """<div class="container">""");
                 }

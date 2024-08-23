@@ -22,7 +22,7 @@ internal sealed class RandomCheck : Check {
 
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         var isHealthy = (Random.Next() & 0x01) != 0;
-        Log.Verbose("RANDOM {Target} status: {Status}", Target, isHealthy ? "Healthy" : "Unhealthy");
+        Log.Verbose("{Check} status: {Status}", this, isHealthy ? "Healthy" : "Unhealthy");
         return isHealthy;
     }
 

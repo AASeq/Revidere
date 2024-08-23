@@ -61,7 +61,7 @@ internal sealed class CheckState {
         while (_healthHistory.Count > 10) { _healthHistory.RemoveAt(0); }
 
         if (isHealthy != IsHealthy) {  // check only if status has changed
-            var maxCount = isHealthy ? Check.CheckProfile.SuccessCount : Check.CheckProfile.FailureCount;
+            var maxCount = isHealthy ? Check.Properties.CheckProfile.SuccessCount : Check.Properties.CheckProfile.FailureCount;
             if (_healthHistory.Count >= maxCount) {
                 var anyNonMatching = false;
                 for (var i = _healthHistory.Count - maxCount; i < _healthHistory.Count; i++) {

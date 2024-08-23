@@ -83,7 +83,7 @@ internal static class WebThread {
                 HealthZ.FillRootResponse(response, checkStates);
             } else {
                 foreach (var checkState in checkStates) {
-                    if (string.Equals(checkState.Check.Name, checkName, StringComparison.OrdinalIgnoreCase)) {
+                    if (string.Equals(checkState.Check.Properties.Name, checkName, StringComparison.OrdinalIgnoreCase)) {
                         HealthZ.FillCheckResponse(response, checkState);
                         return true;
                     }

@@ -5,7 +5,7 @@ checks:
     title: Random A
     name: random-a
   - kind: random
-    target: A
+    target: B
     title: Random B
     name: random-b
   - kind: random
