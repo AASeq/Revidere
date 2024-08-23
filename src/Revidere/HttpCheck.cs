@@ -35,7 +35,11 @@ internal sealed class HttpCheck : Check {
             Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, response.StatusCode);
             return response.IsSuccessStatusCode;
         } catch (Exception ex) {
-            Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, ex);
+            if (ex.InnerException is HttpRequestException hrex) {
+                Log.Debug("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, hrex.Message);
+            } else {
+                Log.Verbose("HTTP {Method} check for {Uri}: {Status}", Method, TargetUrl, ex);
+            }
             return false;
         }
     }
