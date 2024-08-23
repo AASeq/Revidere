@@ -8,7 +8,7 @@ using Revidere;
 public class CheckProfileTests {
 
     [TestMethod]
-    public void Basic() {
+    public void CheckProfile_Basic() {
         var test = new CheckProfile(TimeSpan.FromSeconds(13), TimeSpan.FromSeconds(7), 5, 1);
         Assert.AreEqual(TimeSpan.FromSeconds(13), test.Period);
         Assert.AreEqual(TimeSpan.FromSeconds(7), test.Timeout);
@@ -18,7 +18,7 @@ public class CheckProfileTests {
 
 
     [TestMethod]
-    public void ConstructorErrors() {
+    public void CheckProfile_ConstructorErrors() {
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(0.999), TimeSpan.FromSeconds(5), 3, 3));
         Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CheckProfile(TimeSpan.FromSeconds(600.001), TimeSpan.FromSeconds(5), 3, 3));
 
