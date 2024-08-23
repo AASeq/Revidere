@@ -4,8 +4,8 @@ using System.Threading;
 
 internal sealed class DummyCheck : Check {
 
-    internal DummyCheck(string kind, string target, string? title, string? name, bool isVisible, bool isBreak, CheckProfile profile)
-        : base(kind, target, title, name, isVisible, isBreak, profile) {
+    internal DummyCheck(CommonCheckProperties commonProperties)
+        : base(commonProperties) {
     }
 
     public override bool CheckIsHealthy(CancellationToken cancellationToken) {

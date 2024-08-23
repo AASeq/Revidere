@@ -8,14 +8,14 @@ using Serilog;
 
 internal abstract partial class Check {
 
-    private protected Check(string kind, string target, string? title, string? name, bool isVisible, bool isBreak, CheckProfile profile) {
-        Kind = kind.ToUpperInvariant();  // normalize to upper-case
-        Target = target;
-        Title = title ?? name ?? kind;
-        Name = name;
-        IsVisible = isVisible;
-        IsBreak = isBreak;
-        CheckProfile = profile ?? throw new ArgumentNullException(nameof(profile), "Profile cannot be null.");
+    private protected Check(CommonCheckProperties commonProperties) {
+        Kind = commonProperties.Kind.ToUpperInvariant();  // normalize to upper-case
+        Target = commonProperties.Target;
+        Title = commonProperties.Title ?? commonProperties.Name ?? commonProperties.Kind;
+        Name = commonProperties.Name;
+        IsVisible = commonProperties.IsVisible;
+        IsBreak = commonProperties.IsBreak;
+        CheckProfile = commonProperties.Profile ?? throw new ArgumentNullException(nameof(commonProperties), "Profile cannot be null.");
     }
 
 
@@ -54,6 +54,7 @@ internal abstract partial class Check {
     /// </summary>
     public CheckProfile CheckProfile { get; }
 
+
     /// <summary>
     /// Performs a health check.
     /// </summary>
@@ -79,40 +80,46 @@ internal abstract partial class Check {
             if (!NameRegex().IsMatch(name)) { throw new ArgumentOutOfRangeException(nameof(name), "Name cannot be can consist only of lowecase alphanumeric, numbers, dash (-), and underscore (_) characters."); }
         }
 
-        kind = kind.Trim();
-        target = target.Trim();
-        title = title?.Trim() ?? name ?? kind;
+        var commonProperties = new CommonCheckProperties(
+            kind.Trim(),
+            target.Trim(),
+            title?.Trim(),
+            name,
+            isVisible,
+            isBreak,
+            profile
+        );
 
         if (kind.Equals("dummy", StringComparison.OrdinalIgnoreCase)) {
             if (!string.IsNullOrEmpty(target)) { Log.Information("Target is not used when kind is dummy"); }
-            return new DummyCheck(kind, target, title, name, isVisible, isBreak, profile);
+            return new DummyCheck(commonProperties);
         } else if (kind.Equals("get", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("post", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("put", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("delete", StringComparison.OrdinalIgnoreCase)) {
-            if (Uri.TryCreate(target, UriKind.Absolute, out var uri)) {
-                return new HttpCheck(kind, uri.ToString(), title, name, isVisible, isBreak, profile);
+            if (Uri.TryCreate(target, UriKind.Absolute, out var _)) {
+                return new HttpCheck(commonProperties);
             } else {
                 if (!string.IsNullOrEmpty(target)) { Log.Warning($"Cannot parse target URL '{target}'"); }
                 return null;
             }
         } else if (kind.Equals("ping", StringComparison.OrdinalIgnoreCase)) {
             if (IPAddressRegex().IsMatch(target) || HostRegex().IsMatch(target)) {
-                return new PingCheck(kind, target, title, name, isVisible, isBreak, profile);
+                return new PingCheck(commonProperties);
             } else {
                 if (!string.IsNullOrEmpty(target)) { Log.Warning($"Cannot parse '{target} as hostname or IP address'"); }
                 return null;
             }
         } else if (kind.Equals("random", StringComparison.OrdinalIgnoreCase)) {
-            return new RandomCheck(kind, target, title, name, isVisible, isBreak, profile);
+            return new RandomCheck(commonProperties);
         } else if (kind.Equals("tcp", StringComparison.OrdinalIgnoreCase)) {
             var targetParts = target.Split(':', StringSplitOptions.TrimEntries);
             if (targetParts.Length == 2) {
                 if (IPAddressRegex().IsMatch(targetParts[0]) || HostRegex().IsMatch(targetParts[0])) {
                     if (int.TryParse(targetParts[1], out var port) && (port is > 0 and < 65536)) {
-                        return new TcpCheck(kind, targetParts[0] + ":" + port.ToString(CultureInfo.InvariantCulture), title, name, isVisible, isBreak, profile);
+                        return new TcpCheck(commonProperties);
                     } else {
                         Log.Warning($"Cannot parse '{targetParts[1]} as port number'");
                         return null;
@@ -157,3 +164,7 @@ internal abstract partial class Check {
         }
     }
 }
+
+
+
+internal record CommonCheckProperties(string Kind, string Target, string? Title, string? Name, bool IsVisible, bool IsBreak, CheckProfile Profile);

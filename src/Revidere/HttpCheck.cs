@@ -7,21 +7,23 @@ using Serilog;
 
 internal sealed class HttpCheck : Check {
 
-    internal HttpCheck(string kind, string target, string title, string? name, bool isVisible, bool isBreak, CheckProfile profile)
-        : base(kind, target, title, name, isVisible, isBreak, profile) {
+    internal HttpCheck(CommonCheckProperties commonProperties)
+        : base(commonProperties) {
         Method = Kind switch {
             "GET" => HttpMethod.Get,
             "HEAD" => HttpMethod.Head,
             "POST" => HttpMethod.Post,
             "PUT" => HttpMethod.Put,
             "DELETE" => HttpMethod.Delete,
-            _ => throw new ArgumentException($"Invalid HTTP method: {kind}", nameof(kind)),
+            _ => throw new ArgumentException($"Invalid HTTP method: {commonProperties.Kind}", nameof(commonProperties)),
         };
+
         TargetUrl = new Uri(Target);
     }
 
     private readonly Uri TargetUrl;
     private readonly HttpMethod Method;
+
 
     private static readonly HttpClient HttpClient = new();
 

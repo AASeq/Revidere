@@ -7,18 +7,23 @@ using Serilog;
 
 internal sealed class PingCheck : Check {
 
-    internal PingCheck(string kind, string target, string? title, string? name, bool isVisible, bool isBreak, CheckProfile profile)
-        : base(kind, target, title, name, isVisible, isBreak, profile) {
+    internal PingCheck(CommonCheckProperties commonProperties)
+        : base(commonProperties) {
+
+        Host = commonProperties.Target;
     }
+
+    private readonly string Host;
+
 
     public override bool CheckIsHealthy(CancellationToken cancellationToken) {
         try {
             var pingSender = new Ping();
-            PingReply reply = pingSender.Send(Target, (int)CheckProfile.Timeout.TotalMilliseconds);
-            Log.Verbose("Ping {Host} status: {Status}", Target, reply.Status);
+            PingReply reply = pingSender.Send(Host, (int)CheckProfile.Timeout.TotalMilliseconds);
+            Log.Verbose("Ping {Host} status: {Status}", Host, reply.Status);
             return (reply.Status == IPStatus.Success);
         } catch (Exception ex) {
-            Log.Verbose("Ping {Host} error: {Exception}", Target, ex);
+            Log.Verbose("Ping {Host} error: {Exception}", Host, ex);
             return false;
         }
     }

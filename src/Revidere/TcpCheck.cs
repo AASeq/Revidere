@@ -1,16 +1,15 @@
 namespace Revidere;
 
 using System;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using Serilog;
 
 internal sealed class TcpCheck : Check {
 
-    internal TcpCheck(string kind, string target, string? title, string? name, bool isVisible, bool isBreak, CheckProfile profile)
-        : base(kind, target, title, name, isVisible, isBreak, profile) {
-        var targetParts = target.Split(':', StringSplitOptions.TrimEntries);
+    internal TcpCheck(CommonCheckProperties commonProperties)
+        : base(commonProperties) {
+        var targetParts = commonProperties.Target.Split(':', StringSplitOptions.TrimEntries);
         if (targetParts.Length == 2) {
             if (int.TryParse(targetParts[1], out var port) && (port is > 0 and < 65536)) {
                 Host = targetParts[0];
@@ -25,6 +24,7 @@ internal sealed class TcpCheck : Check {
 
     private readonly string Host;
     private readonly int Port;
+
 
     public override bool CheckIsHealthy(CancellationToken cancellationToken) {
         try {
