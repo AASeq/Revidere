@@ -5,6 +5,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text;
 using YamlDotNet.RepresentationModel;
 
 /// <summary>
@@ -105,7 +106,20 @@ internal sealed class YamlConfig {
             if (string.Equals(child.Key.ToString(), path, StringComparison.OrdinalIgnoreCase)) {
                 if (child.Value is YamlMappingNode mapping) {
                     foreach (var prop in mapping) {
-                        props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), prop.Value.ToString()));
+                        if (prop.Value is YamlSequenceNode sequence) {
+                            var sb = new StringBuilder();
+                            foreach (var chile in sequence.Children) {
+                                if (chile.NodeType == YamlNodeType.Scalar) {
+                                    var childText = child.Value.ToString();
+                                    if (childText.Length == 0) { continue; }
+                                    if (sb.Length > 0) { sb.Append(' '); }
+                                    sb.Append(chile.ToString());
+                                }
+                            }
+                            props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), sb.ToString()));  // it will be space separated if array
+                        } else {
+                            props.Add(new KeyValuePair<string, string>(prop.Key.ToString(), prop.Value.ToString()));
+                        }
                     }
                 }
             }

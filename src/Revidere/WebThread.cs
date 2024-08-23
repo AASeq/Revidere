@@ -49,7 +49,10 @@ internal static class WebThread {
         var checkStates = CheckStates;
 
         var listener = new HttpListener();
-        listener.Prefixes.Add(Configuration!.Prefix);
+        foreach (var prefix in Configuration!.Prefixes) {
+            Log.Verbose("Adding {Prefix} as listener", prefix);
+            listener.Prefixes.Add(prefix);
+        }
         listener.Start();
 
         while (!cancellationToken.IsCancellationRequested) {

@@ -38,14 +38,17 @@ internal sealed class Configuration {
 
             var webConfig = config.GetProperties("web");
 
-            var webPrefix = ParseString(webConfig, "prefix", WebConfiguration.Default.Prefix);
-            if (string.IsNullOrEmpty(webPrefix)) { webPrefix = WebConfiguration.Default.Prefix; }
-            if (!webPrefix.EndsWith('/')) { webPrefix += "/"; }  // prefix must end with a trailing slash
+            var webPrefixText = ParseString(webConfig, "prefix", WebConfiguration.Default.Prefixes[0]);
+            if (string.IsNullOrWhiteSpace(webPrefixText)) { webPrefixText = WebConfiguration.Default.Prefixes[0]; }
+            var webPrefixes = webPrefixText.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            for (var i = 0; i < webPrefixes.Length; i++) {
+                if (!webPrefixes[i].EndsWith('/')) { webPrefixes[i] += '/'; }  // prefix must end with a trailing slash
+            }
 
             var webTitle = ParseString(webConfig, "title", WebConfiguration.Default.Title);
             var webRefresh = ParseInteger(webConfig, "refresh", 1, 60, WebConfiguration.Default.RefreshInterval);
 
-            webConfiguration = new WebConfiguration(webPrefix, webTitle, webRefresh);
+            webConfiguration = new WebConfiguration(webPrefixes, webTitle, webRefresh);
 
 
             // Config: Checks
@@ -184,6 +187,6 @@ internal sealed class Configuration {
 }
 
 
-internal record WebConfiguration(string Prefix, string Title, int RefreshInterval) {
-    public static WebConfiguration Default => new("http://*:8089/", "Revidere", 10);
+internal record WebConfiguration(string[] Prefixes, string Title, int RefreshInterval) {
+    public static WebConfiguration Default => new(["http://*:8089/"], "Revidere", 10);
 }

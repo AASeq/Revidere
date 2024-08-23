@@ -131,7 +131,9 @@ Example:
 This node defines mappings for built-in web server. Its usage is optional.
 
 Key `prefix` controls location where web server will be listening for requests.
-By default this will be on port 8089 (`http://*:8089`). This key is optional.
+By default this will be on port 8089 (`http://*:8089/`). If multiple prefixes
+are required, they can be specified as an sequence or space-separated string.
+This key is optional.
 
 Key `title` controls which title will webpage have (if custom title is
 requested). This key is optional.

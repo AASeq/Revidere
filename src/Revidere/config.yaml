@@ -32,6 +32,7 @@ checks:
     failure: 2
 
 web:
+  prefix: http://*:8089
   title: Status
   refresh: 1
 

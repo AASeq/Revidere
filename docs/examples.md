@@ -109,6 +109,33 @@ web:
 No exact equivalent when using just an environment variable.
 
 
+## Exact IP for web interface
+
+Web prefix can be used to fix listener to a single IP address.
+
+```yaml
+web:
+  prefix: http://192.168.1.1:8089/
+```
+
+No equivalent when using just an environment variable.
+
+
+## Multiple prefixes
+
+You can listen at multiple prefixes if you specify multiple prefixes. Example
+below listens to both port 8089 and 8090.
+
+```yaml
+web:
+  prefix:
+    - http://*:8089/
+    - http://*:8090/
+```
+
+No equivalent when using just an environment variable.
+
+
 ## More Expansive Logging
 
 Increases log level for console to debug and file log level to verbose.
