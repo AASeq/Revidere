@@ -1,6 +1,7 @@
 namespace Revidere;
 
 using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Serilog;
@@ -106,6 +107,24 @@ internal abstract partial class Check {
             }
         } else if (kind.Equals("random", StringComparison.OrdinalIgnoreCase)) {
             return new RandomCheck(kind, target, title, name, isVisible, isBreak, profile);
+        } else if (kind.Equals("tcp", StringComparison.OrdinalIgnoreCase)) {
+            var targetParts = target.Split(':', StringSplitOptions.TrimEntries);
+            if (targetParts.Length == 2) {
+                if (IPAddressRegex().IsMatch(targetParts[0]) || HostRegex().IsMatch(targetParts[0])) {
+                    if (int.TryParse(targetParts[1], out var port) && (port is > 0 and < 65536)) {
+                        return new TcpCheck(kind, targetParts[0] + ":" + port.ToString(CultureInfo.InvariantCulture), title, name, isVisible, isBreak, profile);
+                    } else {
+                        Log.Warning($"Cannot parse '{targetParts[1]} as port number'");
+                        return null;
+                    }
+                } else {
+                    if (!string.IsNullOrEmpty(target)) { Log.Warning($"Cannot parse '{targetParts[0]} as hostname or IP address'"); }
+                    return null;
+                }
+            } else {
+                Log.Warning($"Cannot parse '{target} as hostname or IP address + port pair'");
+                return null;
+            }
         } else {
             if (!string.IsNullOrEmpty(target)) { Log.Warning($"Unrecognized check kind '{kind}'"); }
             return null;

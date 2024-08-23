@@ -77,6 +77,20 @@ Each member of sequence can contain the following keys:
 This node is mandatory.
 
 
+### kind: get/head/post/put/delete
+
+Key `target` is a mandatory and its value must be URL that request is sent to.
+Kind matches the HTTP method to be used.
+
+Example:
+```yaml
+- kind: get
+  target: http://example.com
+- kind: head
+  target: http://example.net
+```
+
+
 ### kind: ping
 
 Key `target` is a mandatory and its value must be either hostname or ip that
@@ -89,17 +103,15 @@ Example:
 ```
 
 
-### kind: get/head/post/put/delete
+### kind: tcp
 
-Key `target` is a mandatory and its value must be URL that request is sent to.
-Kind matches the HTTP method to be used.
+Key `target` is a mandatory and its value must be either hostname or ip that
+followed by colon and port number.
 
 Example:
 ```yaml
-- kind: get
-  target: http://example.com
-- kind: head
-  target: http://example.net
+- kind: tcp
+  target: 1.1.1.1:443
 ```
 
 

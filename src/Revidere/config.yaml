@@ -30,9 +30,14 @@ checks:
     title: Random Health Probe
     success: 3
     failure: 2
+  - kind: TCP
+    target: aaseq.com:80
+    title: TCP
+    period: 10
+    timeout: 0.001
 
 web:
-  prefix: http://*:8089
+  prefix: http://*:8089/
   title: Status
   refresh: 1
 
