@@ -5,7 +5,24 @@
     <meta charset="UTF-8">
     <title><!--{{TITLE}}--></title>
     <script>
-        setTimeout(function() { window.location = window.location; }, <!--{{REFRESH}}-->000);
+        function loadAndReplacePage() {
+            fetch(window.location.href, { cache: 'no-store' })
+                .then(response => {
+                    if (!response.ok) { throw new Error(); }
+                    return response.text();
+                })
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(error => {
+                    setTimeout(loadAndReplacePage, <!--{{REFRESH}}-->000);
+                    document.body.style.backgroundColor = "#130000";
+                });
+        }
+
+        setTimeout(loadAndReplacePage, <!--{{REFRESH}}-->000);
     </script>
     <noscript>
         <meta http-equiv="refresh" content="<!--{{REFRESH}}-->" />
