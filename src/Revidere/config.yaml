@@ -26,7 +26,7 @@ checks:
     title: aaseq.com (HEAD)
     period: 30
   - kind: GET
-    target: http://localhost:8089/healthz/random
+    target: http://localhost:11080/healthz/random
     title: Random Health Probe
     success: 3
     failure: 2
@@ -37,7 +37,7 @@ checks:
     timeout: 0.001
 
 web:
-  prefix: http://*:8089/
+  prefix: http://*:11080/
   title: Status
   refresh: 1
 

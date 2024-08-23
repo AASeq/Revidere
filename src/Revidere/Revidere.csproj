@@ -17,7 +17,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ContainerPort Include="8089" Type="tcp" />
+        <ContainerPort Include="11080" Type="tcp" />
     </ItemGroup>
 
 

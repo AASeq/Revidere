@@ -57,7 +57,7 @@ checks:
     title: Random
     name: random
   - kind: GET
-    target: http://localhost:8089/healthz/random
+    target: http://localhost:11080/healthz/random
     title: Random Health Probe
 ```
 
@@ -87,7 +87,7 @@ CHECKS=https://www.ntppool.org/en/,ping://0.pool.ntp.org
 
 Web check done every 5 seconds with 200 ms timeout. It takes 5 successful checks
 to become healthy but only 2 to go unhealthy. Since check is named (`aaseq`),
-its status can be checked at http://localhost:8089/healthz/aaseq.
+its status can be checked at http://localhost:11080/healthz/aaseq.
 
 And website title is customized.
 
@@ -115,7 +115,7 @@ Web prefix can be used to fix listener to a single IP address.
 
 ```yaml
 web:
-  prefix: http://192.168.1.1:8089/
+  prefix: http://192.168.1.1:11080/
 ```
 
 No equivalent when using just an environment variable.
@@ -124,13 +124,13 @@ No equivalent when using just an environment variable.
 ## Multiple prefixes
 
 You can listen at multiple prefixes if you specify multiple prefixes. Example
-below listens to both port 8089 and 8090.
+below listens to both port 11080 and 11081.
 
 ```yaml
 web:
   prefix:
-    - http://*:8089/
-    - http://*:8090/
+    - http://*:11080/
+    - http://*:11081/
 ```
 
 No equivalent when using just an environment variable.

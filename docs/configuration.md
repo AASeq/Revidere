@@ -23,7 +23,7 @@ checks:
     timeout: 0.1
   - title: Random Health Probe
     kind: get
-    target: http://localhost:8089/healthz/random
+    target: http://localhost:11080/healthz/random
     success: 3
     failure: 2
     period: 20
@@ -143,7 +143,7 @@ Example:
 This node defines mappings for built-in web server. Its usage is optional.
 
 Key `prefix` controls location where web server will be listening for requests.
-By default this will be on port 8089 (`http://*:8089/`). If multiple prefixes
+By default this will be on port 11080 (`http://*:11080/`). If multiple prefixes
 are required, they can be specified as an sequence or space-separated string.
 This key is optional.
 
@@ -157,7 +157,7 @@ that this only impacts web interface and not health checks. Default value is
 Example:
 ```yaml
 web:
-  prefix: http://*:8089
+  prefix: http://*:11080/
   title: Status
   refresh: 10
 ```

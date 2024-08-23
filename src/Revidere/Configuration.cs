@@ -188,5 +188,5 @@ internal sealed class Configuration {
 
 
 internal record WebConfiguration(string[] Prefixes, string Title, int RefreshInterval) {
-    public static WebConfiguration Default => new(["http://*:8089/"], "Revidere", 10);
+    public static WebConfiguration Default => new(["http://*:11080/"], "Revidere", 10);
 }
