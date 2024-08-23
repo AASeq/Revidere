@@ -43,7 +43,7 @@ internal sealed class Configuration {
             if (!webPrefix.EndsWith('/')) { webPrefix += "/"; }  // prefix must end with a trailing slash
 
             var webTitle = ParseString(webConfig, "title", WebConfiguration.Default.Title);
-            var webRefresh = ParseInteger(webConfig, "refresh", 5, 60, WebConfiguration.Default.RefreshInterval);
+            var webRefresh = ParseInteger(webConfig, "refresh", 1, 60, WebConfiguration.Default.RefreshInterval);
 
             webConfiguration = new WebConfiguration(webPrefix, webTitle, webRefresh);
 

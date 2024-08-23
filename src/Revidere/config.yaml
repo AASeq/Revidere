@@ -33,7 +33,7 @@ checks:
 
 web:
   title: Status
-  refresh: 10
+  refresh: 1
 
 logging:
   console: verbose
