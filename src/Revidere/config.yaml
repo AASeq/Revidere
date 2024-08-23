@@ -3,9 +3,11 @@ checks:
   - kind: random
     target: A
     title: Random A
+    name: random-a
   - kind: random
     target: A
     title: Random B
+    name: random-b
   - kind: random
     name: random
     title: Random
@@ -35,6 +37,10 @@ checks:
     title: TCP
     period: 10
     timeout: 0.001
+  - kind: COMPOSITE
+    title: Composite Random
+    target: random random-a random-b
+    percent: 50
 
 web:
   prefix: http://*:11080/

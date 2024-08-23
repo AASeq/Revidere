@@ -1,6 +1,7 @@
 namespace Revidere;
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Serilog;
@@ -63,8 +64,9 @@ internal abstract partial class Check {
     /// <summary>
     /// Performs a health check.
     /// </summary>
+    /// <param name="checkStates">List of all other check states.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    public abstract bool CheckIsHealthy(CancellationToken cancellationToken);
+    public abstract bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken);
 
 
     /// <summary>
@@ -92,6 +94,8 @@ internal abstract partial class Check {
         if (kind.Equals("dummy", StringComparison.OrdinalIgnoreCase)) {
             if (!string.IsNullOrEmpty(target)) { Log.Information("Target is not used when kind is dummy"); }
             return new DummyCheck(checkProperties);
+        } else if (kind.Equals("composite", StringComparison.OrdinalIgnoreCase)) {
+            return new CompositeCheck(checkProperties);
         } else if (kind.Equals("get", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("head", StringComparison.OrdinalIgnoreCase)
             || kind.Equals("head", StringComparison.OrdinalIgnoreCase)

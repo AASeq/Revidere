@@ -8,7 +8,16 @@ public class CheckStateTests {
 
     [TestMethod]
     public void CheckState_Basic() {
-        var test = Check.FromConfigData(kind: "dummy", target: "localhost", title: "Dummy", name: null, isVisible: false, isBreak: false, new CheckProfile(1, 1));
+        var test = Check.FromProperties(new CheckProperties(
+            "dummy",
+            "localhost",
+            "Dummy",
+            null,
+            false,
+            false,
+            null,
+            new CheckProfile(1, 1))
+        );
         var state = new CheckState(test);
 
         Assert.AreEqual(null, state.IsHealthy);
@@ -28,7 +37,16 @@ public class CheckStateTests {
 
     [TestMethod]
     public void CheckState_Default() {
-        var test = Check.FromConfigData(kind: "dummy", target: "localhost", title: "Dummy", name: null, isVisible: false, isBreak: false, CheckProfile.Default);
+        var test = Check.FromProperties(new CheckProperties(
+            "dummy",
+            "localhost",
+            "Dummy",
+            null,
+            false,
+            false,
+            null,
+            CheckProfile.Default)
+        );
         var state = new CheckState(test);
 
         Assert.AreEqual(null, state.IsHealthy);

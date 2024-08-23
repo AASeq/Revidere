@@ -1,6 +1,7 @@
 namespace Revidere;
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using Serilog;
@@ -28,7 +29,7 @@ internal sealed class HttpCheck : Check {
 
     private static readonly HttpClient HttpClient = new();
 
-    public override bool CheckIsHealthy(CancellationToken cancellationToken) {
+    public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         try {
             var timeoutCancelSource = new CancellationTokenSource(CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);

@@ -10,6 +10,7 @@ internal static class CheckerThread {
     public static void Start(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         Log.Verbose("Starting Checker thread");
         CancellationToken = cancellationToken;
+        CheckStates = checkStates;
 
         var index = 0;
         foreach (var checkState in checkStates) {
@@ -33,6 +34,7 @@ internal static class CheckerThread {
 
     private static readonly IList<Thread> Threads = [];
     private static CancellationToken? CancellationToken;
+    private static IReadOnlyList<CheckState> CheckStates = [];
 
 
     private static void Run(object? state) {
@@ -49,7 +51,7 @@ internal static class CheckerThread {
             var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds > profile.Period.TotalSeconds;
 
             if (shouldCheck) {
-                var isHealthy = check.CheckIsHealthy(cancellationToken);
+                var isHealthy = check.CheckIsHealthy(CheckStates, cancellationToken);
                 Log.Debug("Check for {Check}: {Status}", check, isHealthy ? "healthy" : "unhealthy");
                 checkState!.UpdateCheck(isHealthy);
             }

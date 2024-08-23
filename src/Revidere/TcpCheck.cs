@@ -1,6 +1,7 @@
 namespace Revidere;
 
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using Serilog;
@@ -27,7 +28,7 @@ internal sealed class TcpCheck : Check {
     private readonly int Port;
 
 
-    public override bool CheckIsHealthy(CancellationToken cancellationToken) {
+    public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         try {
             var timeoutCancelSource = new CancellationTokenSource(CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);

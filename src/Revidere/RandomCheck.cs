@@ -1,7 +1,9 @@
 namespace Revidere;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
+using Serilog;
 
 internal sealed class RandomCheck : Check {
 
@@ -18,8 +20,10 @@ internal sealed class RandomCheck : Check {
     private readonly Random Random;
 
 
-    public override bool CheckIsHealthy(CancellationToken cancellationToken) {
-        return (Random.Next() & 0x01) != 0;
+    public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
+        var isHealthy = (Random.Next() & 0x01) != 0;
+        Log.Verbose("RANDOM {Target} status: {Status}", Target, isHealthy ? "Healthy" : "Unhealthy");
+        return isHealthy;
     }
 
 }
