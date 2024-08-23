@@ -5,10 +5,11 @@ using System.Threading;
 
 internal sealed class RandomCheck : Check {
 
-    internal RandomCheck(CommonCheckProperties commonProperties)
-        : base(commonProperties) {
+    internal RandomCheck(CheckProperties checkProperties)
+        : base(checkProperties) {
+
         var seed = 0;
-        foreach (var ch in commonProperties.Target) {
+        foreach (var ch in checkProperties.Target) {
             seed = (seed << 5) ^ (seed << 3) ^ (seed << 1) ^ ch;
         }
         Random = (seed == 0) ? new Random((int)DateTime.Now.Ticks) : new Random(seed);

@@ -7,10 +7,10 @@ using Serilog;
 
 internal sealed class PingCheck : Check {
 
-    internal PingCheck(CommonCheckProperties commonProperties)
-        : base(commonProperties) {
+    internal PingCheck(CheckProperties checkProperties)
+        : base(checkProperties) {
 
-        Host = commonProperties.Target;
+        Host = checkProperties.Target;
     }
 
     private readonly string Host;

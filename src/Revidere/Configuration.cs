@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Globalization;
 using Serilog;
 
@@ -77,15 +78,19 @@ internal sealed class Configuration {
                 var checkFailure = ParseInteger(checkConfig, "failure", 1, 10, CheckProfile.Default.FailureCount);
                 var isVisible = ParseBool(checkConfig, "visible", true);
                 var isBreak = ParseBool(checkConfig, "break", false);
+                var percent = ParseNullableInteger(checkConfig, "percent", 1, 100);
 
-                var check = Check.FromConfigData(
+                var checkProperties = new CheckProperties(
                     checkKind,
                     checkTarget ?? "",
                     checkTitle ?? checkName ?? checkKind,
                     checkName,
                     isVisible,
                     isBreak,
-                new CheckProfile(checkPeriod, checkTimeout, checkSuccess, checkFailure));
+                    percent,
+                    new CheckProfile(checkPeriod, checkTimeout, checkSuccess, checkFailure)
+                );
+                var check = Check.FromProperties(checkProperties);
                 if (check != null) { checks.Add(check); }
 
                 Log.Information("Configured check {check}", check);
@@ -107,14 +112,15 @@ internal sealed class Configuration {
                 Log.Warning($"Check kind not set for '{targetUrl}'; skipping check");
                 continue;
             }
-            var check = Check.FromConfigData(
+            var check = Check.FromProperties(new CheckProperties(
                 checkKind,
                 checkTarget ?? "",
-                title: null,
-                name: null,
-                isVisible: true,
-                isBreak: false,
-                CheckProfile.Default);
+                null,  // Title
+                null,  // Name
+                true,  // Visible
+                false,  // Break
+                null,  // Percent
+                CheckProfile.Default));
             if (check != null) { checks.Add(check); }
             Log.Information("Configured check {check}", check);
         }
@@ -162,6 +168,22 @@ internal sealed class Configuration {
             Log.Warning("Check " + key + " count too high; adjusted to {count}", value);
         }
         return value;
+    }
+
+    private static int? ParseNullableInteger(FrozenDictionary<string, string> checkConfig, string key, int minValue, int maxValue) {
+        checkConfig.TryGetValue(key, out var valueText);
+        if (int.TryParse(valueText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) {
+            if (value < minValue) {
+                value = minValue;
+                Log.Warning("Check " + key + " count too low; adjusted to {count}", value);
+            } else if (value > maxValue) {
+                value = maxValue;
+                Log.Warning("Check " + key + " count too high; adjusted to {count}", value);
+            }
+            return value;
+        } else {
+            return null;
+        }
     }
 
     private static double ParseDouble(FrozenDictionary<string, string> checkConfig, string key, double minValue, double maxValue, double defaultValue) {

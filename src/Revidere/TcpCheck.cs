@@ -7,9 +7,10 @@ using Serilog;
 
 internal sealed class TcpCheck : Check {
 
-    internal TcpCheck(CommonCheckProperties commonProperties)
-        : base(commonProperties) {
-        var targetParts = commonProperties.Target.Split(':', StringSplitOptions.TrimEntries);
+    internal TcpCheck(CheckProperties checkProperties)
+        : base(checkProperties) {
+
+        var targetParts = checkProperties.Target.Split(':', StringSplitOptions.TrimEntries);
         if (targetParts.Length == 2) {
             if (int.TryParse(targetParts[1], out var port) && (port is > 0 and < 65536)) {
                 Host = targetParts[0];
