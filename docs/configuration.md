@@ -115,6 +115,25 @@ Example:
 ```
 
 
+#### kind: composite
+
+This kind is used to combine other checks.
+
+Key `target` is a mandatory and its value is one or more space-separated names.
+
+Key `percent` is optional and defines how many targets need to be healthy for
+check to be healthy as well. Default value is 100.
+
+Success and failure count are not used for this check kind.
+
+Example:
+```yaml
+- kind: composite
+  target: a b
+  percent: 50
+```
+
+
 #### kind: dummy
 
 This kind is used for troubleshooting. It always returns true.
@@ -122,6 +141,26 @@ This kind is used for troubleshooting. It always returns true.
 Example:
 ```yaml
 - kind: dummy
+```
+
+
+#### kind: true
+
+This kind is used for troubleshooting. It always returns true.
+
+Example:
+```yaml
+- kind: true
+```
+
+
+#### kind: false
+
+This kind is used for troubleshooting. It always returns false.
+
+Example:
+```yaml
+- kind: false
 ```
 
 

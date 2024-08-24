@@ -8,7 +8,15 @@ using Serilog;
 internal sealed class CompositeCheck : Check {
 
     internal CompositeCheck(CheckProperties checkProperties)
-        : base(checkProperties) {
+        : base(new CheckProperties(
+            checkProperties.Kind,
+            checkProperties.Target,
+            checkProperties.Title,
+            checkProperties.Name,
+            checkProperties.IsVisible,
+            checkProperties.IsBreak,
+            checkProperties.PercentThreshold,
+            new CheckProfile(1, 1))) {  // force immediate healthy/unhealthy state
 
         CheckNames = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
         foreach (var name in checkProperties.Target.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)) {
