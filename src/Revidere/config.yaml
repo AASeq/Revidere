@@ -46,6 +46,7 @@ web:
   prefix: http://*:11080/
   title: Status
   refresh: 1
+  history: true
 
 logging:
   console: verbose

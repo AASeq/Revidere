@@ -1,6 +1,5 @@
 namespace Revidere;
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,7 +12,7 @@ internal static class Html {
 
     private static readonly Encoding Utf8 = new UTF8Encoding(false);
 
-    public static void FillResponse(HttpListenerResponse response, IEnumerable<CheckState> checkStates, string webTitle, int refreshInterval) {
+    public static void FillResponse(HttpListenerResponse response, IEnumerable<CheckState> checkStates, string webTitle, int refreshInterval, bool showHistory) {
         var sw = Stopwatch.StartNew();
         try {
             Log.Verbose("Starting HTML response");
@@ -40,17 +39,18 @@ internal static class Html {
                 sb.AppendLine($"""            <div class="title">{checkState.Check.Properties.Title}</div>""");
                 sb.AppendLine("""            <div class="semaphore"></div>""");
 
-                if (check is not CompositeCheck) {
-                    sb.AppendLine("""            <div class="history">""");
+                sb.AppendLine("""            <div class="history">""");
+                if (showHistory && (check is not CompositeCheck)) {
                     var i = 0;
                     foreach (var state in checkState.HealthHistory) {
                         sb.AppendLine("                " + (state ? """<div class="historicalOk"></div>""" : """<div class="historicalNok"></div>"""));
                         i++;
                         if (i >= 10) { break; }
                     }
-                    sb.AppendLine("""            </div>""");
-                    sb.AppendLine("""        </div>""");
                 }
+                sb.AppendLine("""            </div>""");
+
+                sb.AppendLine("""        </div>""");
 
                 if (check.Properties.IsBreak) {
                     sb.AppendLine("""    </div>""");

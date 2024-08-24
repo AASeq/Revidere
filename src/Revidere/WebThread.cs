@@ -72,7 +72,7 @@ internal static class WebThread {
 
         using var response = context.Response;
         if (path == "/") {
-            Html.FillResponse(response, checkStates, Configuration!.Title, Configuration!.RefreshInterval);
+            Html.FillResponse(response, checkStates, Configuration!.Title, Configuration!.RefreshInterval, Configuration.ShowHistory);
             return true;
         } else if (path.Equals("/healthz", StringComparison.OrdinalIgnoreCase)) {
             HealthZ.FillRootResponse(response, checkStates);

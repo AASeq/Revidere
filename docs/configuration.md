@@ -194,12 +194,16 @@ Key `refresh` controls how often page will refresh in a browser. Please note
 that this only impacts web interface and not health checks. Default value is
 `10` seconds. This key is optional.
 
+Key `history` controls if status of the last 10 checks will be shown at bottom
+of the status semaphore. Default value is `true`. This key is optional.
+
 Example:
 ```yaml
 web:
   prefix: http://*:11080/
   title: Status
   refresh: 10
+  history: true
 ```
 
 

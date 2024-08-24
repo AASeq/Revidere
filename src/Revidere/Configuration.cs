@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Globalization;
 using Serilog;
 
@@ -48,8 +47,9 @@ internal sealed class Configuration {
 
             var webTitle = ParseString(webConfig, "title", WebConfiguration.Default.Title);
             var webRefresh = ParseInteger(webConfig, "refresh", 1, 60, WebConfiguration.Default.RefreshInterval);
+            var webShowHistory = ParseBool(webConfig, "history", WebConfiguration.Default.ShowHistory);
 
-            webConfiguration = new WebConfiguration(webPrefixes, webTitle, webRefresh);
+            webConfiguration = new WebConfiguration(webPrefixes, webTitle, webRefresh, webShowHistory);
 
 
             // Config: Checks
@@ -210,6 +210,6 @@ internal sealed class Configuration {
 }
 
 
-internal record WebConfiguration(string[] Prefixes, string Title, int RefreshInterval) {
-    public static WebConfiguration Default => new(["http://*:11080/"], "Revidere", 10);
+internal record WebConfiguration(string[] Prefixes, string Title, int RefreshInterval, bool ShowHistory) {
+    public static WebConfiguration Default => new(["http://*:11080/"], "Revidere", 10, false);
 }
