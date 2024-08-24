@@ -124,7 +124,8 @@ Key `target` is a mandatory and its value is one or more space-separated names.
 Key `percent` is optional and defines how many targets need to be healthy for
 check to be healthy as well. Default value is 100.
 
-Success and failure count are not used for this check kind.
+Profile fields (`success`, `failure`, `period`, `timeout`) are not used for this
+check kind. Update interval for this check is always 1 second.
 
 Example:
 ```yaml

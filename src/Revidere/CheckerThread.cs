@@ -47,8 +47,9 @@ internal static class CheckerThread {
             var check = checkState!.Check;
             var profile = check.Properties.CheckProfile;
 
+            var period = (check is CompositeCheck) ? 1 : profile.Period.TotalSeconds;  // composite checks are always 1 second
             var lastUpdate = checkState?.LastUpdated ?? DateTimeOffset.MinValue;
-            var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds > profile.Period.TotalSeconds;
+            var shouldCheck = (DateTimeOffset.Now - lastUpdate).TotalSeconds >= period;
 
             if (shouldCheck) {
                 var isHealthy = check.CheckIsHealthy(CheckStates, cancellationToken);
