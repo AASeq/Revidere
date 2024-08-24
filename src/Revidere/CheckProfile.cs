@@ -68,6 +68,6 @@ internal sealed class CheckProfile {
     /// <summary>
     /// Gets the default check profile.
     /// </summary>
-    public static CheckProfile Default { get; } = new CheckProfile(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5), 2, 2);
+    public static CheckProfile Default { get; } = new CheckProfile(TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(5), 3, 3);
 
 }

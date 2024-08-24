@@ -40,7 +40,7 @@ public class CheckStateTests {
         Assert.AreEqual(1, state.HealthHistory.Count);
 
         state.UpdateCheck(true);
-        Assert.AreEqual(true, state.IsHealthy);
+        Assert.AreEqual(null, state.IsHealthy);
         Assert.AreEqual(true, state.HealthHistory[0]);
         Assert.AreEqual(true, state.HealthHistory[1]);
         Assert.AreEqual(2, state.HealthHistory.Count);
@@ -61,7 +61,7 @@ public class CheckStateTests {
         Assert.AreEqual(4, state.HealthHistory.Count);
 
         state.UpdateCheck(false);
-        Assert.AreEqual(false, state.IsHealthy);
+        Assert.AreEqual(true, state.IsHealthy);
         Assert.AreEqual(true, state.HealthHistory[0]);
         Assert.AreEqual(true, state.HealthHistory[1]);
         Assert.AreEqual(true, state.HealthHistory[2]);
@@ -91,7 +91,7 @@ public class CheckStateTests {
         Assert.AreEqual(7, state.HealthHistory.Count);
 
         state.UpdateCheck(true);
-        Assert.AreEqual(true, state.IsHealthy);
+        Assert.AreEqual(false, state.IsHealthy);
         Assert.AreEqual(true, state.HealthHistory[0]);
         Assert.AreEqual(true, state.HealthHistory[1]);
         Assert.AreEqual(true, state.HealthHistory[2]);
