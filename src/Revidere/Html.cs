@@ -1,5 +1,6 @@
 namespace Revidere;
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -31,10 +32,12 @@ internal static class Html {
                 var check = checkState.Check;
                 if (check.Properties.IsVisible == false) { continue; }
 
+                var sinceText = GetSinceText(checkState);
+
                 sb.AppendLine(checkState.IsHealthy switch {
-                    true => $"""        <div class="ok">""",
-                    false => $"""        <div class="nok">""",
-                    _ => $"""        <div class="pending">""",
+                    true => $"""        <div class="ok" title="{sinceText}">""",
+                    false => $"""        <div class="nok" title="{sinceText}">""",
+                    _ => $"""        <div class="pending" title="{sinceText}">""",
                 });
                 sb.AppendLine($"""            <div class="title">{checkState.Check.Properties.Title}</div>""");
                 sb.AppendLine("""            <div class="semaphore"></div>""");
@@ -75,4 +78,46 @@ internal static class Html {
             Log.Verbose("Completed HTML response in {Interval} ms", sw.ElapsedMilliseconds);
         }
     }
+
+
+    private static string GetSinceText(CheckState checkState) {
+        var isHealthy = checkState.IsHealthy;
+        var lastChange = checkState.LastChanged;
+
+        if (isHealthy == null) {
+            return "Pending";
+        } else {
+            var healthText = (isHealthy.Value ? "Healthy" : "Unhealthy");
+            if (lastChange != null) {
+                var duration = DateTime.UtcNow - lastChange.Value;
+
+                var sbDuration = new StringBuilder();
+                if (duration.Days > 0) {
+                    sbDuration.Append("for ");
+                    sbDuration.Append(GetPlural(duration.Days, "day", "days"));
+                    sbDuration.Append(", " + GetPlural(duration.Hours, "hour", "hours"));
+                    sbDuration.Append(", and " + GetPlural(duration.Minutes, "minute", "minutes"));
+                } else if (duration.Hours > 0) {
+                    sbDuration.Append("for ");
+                    sbDuration.Append(GetPlural(duration.Hours, "hour", "hours"));
+                    sbDuration.Append(", and " + GetPlural(duration.Minutes, "minute", "minutes"));
+                } else if (duration.Minutes > 0) {
+                    sbDuration.Append("for ");
+                    sbDuration.Append(GetPlural(duration.Minutes, "minute", "minutes"));
+                } else {
+                    sbDuration.Append("as of recently");
+                }
+
+                return healthText + " " + sbDuration.ToString() + " (" + lastChange.Value.ToString("yyyy-MM-dd HH:mm:ss") + ")";
+            } else {
+                return healthText;
+            }
+        }
+    }
+
+    private static string GetPlural(double value, string singular, string plural) {
+        var wholeNumber = (int)value;
+        return wholeNumber.ToString("0") + " " + (wholeNumber == 1 ? singular : plural);
+    }
+
 }
