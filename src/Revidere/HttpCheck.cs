@@ -45,7 +45,8 @@ internal sealed class HttpCheck : Check {
             Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", "Timeout", sw.ElapsedMilliseconds);
             return false;
         } catch (Exception ex) {
-            if (ex.InnerException is HttpRequestException hrex) {
+            while(ex.InnerException != null) { ex = ex.InnerException; }  // unwrap all exceptions
+            if (ex is HttpRequestException hrex) {
                 Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", hrex.Message, sw.ElapsedMilliseconds);
             } else {
                 Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", ex.Message, sw.ElapsedMilliseconds);

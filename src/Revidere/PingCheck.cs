@@ -27,6 +27,7 @@ internal sealed class PingCheck : Check {
             Log.Verbose("{Check} status: {Status} ({Code}; {Duration}ms)", this, isHealthy ? "Healthy" : "Unhealthy", reply.Status, sw.ElapsedMilliseconds);
             return isHealthy;
         } catch (Exception ex) {
+            while(ex.InnerException != null) { ex = ex.InnerException; }  // unwrap all exceptions
             Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", ex.Message, sw.ElapsedMilliseconds);
             return false;
         }
