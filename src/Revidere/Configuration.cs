@@ -79,6 +79,7 @@ internal sealed class Configuration {
                 var isVisible = ParseBool(checkConfig, "visible", true);
                 var isBreak = ParseBool(checkConfig, "break", false);
                 var percent = ParseNullableInteger(checkConfig, "percent", 1, 100);
+                var followRedirect = ParseBool(checkConfig, "follow", true);
                 var allowInsecure = ParseBool(checkConfig, "insecure", false);
 
                 var checkProperties = new CheckProperties(
@@ -89,6 +90,7 @@ internal sealed class Configuration {
                     isVisible,
                     isBreak,
                     percent,
+                    followRedirect,
                     allowInsecure,
                     new CheckProfile(checkPeriod, checkTimeout, checkSuccess, checkFailure)
                 );
@@ -123,6 +125,7 @@ internal sealed class Configuration {
                 true,  // Visible
                 false,  // Break
                 null,  // Percent
+                true,  // FollowRedirect
                 false,  // AllowInsecure
                 CheckProfile.Default));
             if (check != null) { checks.Add(check); }

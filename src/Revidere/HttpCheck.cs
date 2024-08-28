@@ -3,6 +3,7 @@ namespace Revidere;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using Serilog;
@@ -23,14 +24,18 @@ internal sealed class HttpCheck : Check {
 
         TargetUrl = new Uri(checkProperties.Target);
 
-        if (checkProperties.AllowInsecure == true) {
-            HttpClient = new(new HttpClientHandler {
+        var handler = checkProperties.AllowInsecure switch {
+            true => new HttpClientHandler {
+                AllowAutoRedirect = checkProperties.FollowRedirect,
                 ClientCertificateOptions = ClientCertificateOption.Manual,
                 ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
-            });
-        } else {
-            HttpClient = new();
-        }
+            },
+            false => new HttpClientHandler {
+                AllowAutoRedirect = checkProperties.FollowRedirect,
+            },
+        };
+        HttpClient = new(handler);
+
     }
 
     private readonly Uri TargetUrl;
@@ -45,9 +50,15 @@ internal sealed class HttpCheck : Check {
 
             var request = new HttpRequestMessage(Method, TargetUrl);
             var response = HttpClient.SendAsync(request, linkedCancelSource.Token).Result;
-            var isHealthy = response.IsSuccessStatusCode;
-            Log.Verbose("{Check} status: {Status} ({Code}; {Duration}ms)", this, isHealthy ? "Healthy" : "Unhealthy", (int)response.StatusCode, sw.ElapsedMilliseconds);
-            return isHealthy;
+            if (response.StatusCode == HttpStatusCode.Redirect) {
+                var redirectLocation = response.Headers.Location;
+                Log.Verbose("{Check} status: {Status} ({Code} {Location}; {Duration}ms)", this, "Redirect", (int)response.StatusCode,redirectLocation,  sw.ElapsedMilliseconds);
+                return false;
+            } else {
+                var isHealthy = response.IsSuccessStatusCode;
+                Log.Verbose("{Check} status: {Status} ({Code}; {Duration}ms)", this, isHealthy ? "Healthy" : "Unhealthy", (int)response.StatusCode, sw.ElapsedMilliseconds);
+                return isHealthy;
+            }
         } catch (OperationCanceledException) {
             Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", "Timeout", sw.ElapsedMilliseconds);
             return false;

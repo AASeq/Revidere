@@ -86,6 +86,10 @@ Key `insecure` is an optional boolean key with default of `false`. If set to
 `true`, HTTP/S connections without certificate check will be allowed. Ignored for
 HTTP targets.
 
+Key `follow` is an optional boolean key with default of `true`. If set to
+`false`, redirects will not be followed. Please note that any redirection from
+https to http will stop the redirect chain.
+
 Example:
 ```yaml
 - kind: get

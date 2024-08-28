@@ -7,7 +7,7 @@ namespace Revidere;
 
 internal partial record CheckProperties {
 
-    public CheckProperties(string kind, string? target, string? title, string? name, bool isVisible, bool isBreak, int? percentThreshold, bool? allowInsecure, CheckProfile profile) {
+    public CheckProperties(string kind, string? target, string? title, string? name, bool isVisible, bool isBreak, int? percentThreshold, bool followRedirect, bool allowInsecure, CheckProfile profile) {
         kind = kind.Trim();
         name = string.IsNullOrEmpty(name) ? null : name.Trim();  // if empty, assume null
 
@@ -18,6 +18,7 @@ internal partial record CheckProperties {
         IsVisible = isVisible;
         IsBreak = isBreak;
         PercentThreshold = percentThreshold;
+        FollowRedirect = followRedirect;
         AllowInsecure = allowInsecure;
         CheckProfile = profile ?? CheckProfile.Default;
 
@@ -70,9 +71,14 @@ internal partial record CheckProperties {
     public int? PercentThreshold { get; }
 
     /// <summary>
+    /// Gets if HTTP/HTTPS requests will follow redirect responses.
+    /// </summary>
+    public bool FollowRedirect { get; }
+
+    /// <summary>
     /// Gets if insecure HTTPS access is allowed.
     /// </summary>
-    public bool? AllowInsecure { get; }
+    public bool AllowInsecure { get; }
 
     /// <summary>
     /// Gets check profile.

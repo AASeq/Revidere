@@ -17,6 +17,7 @@ internal sealed class CompositeCheck : Check {
             checkProperties.IsVisible,
             checkProperties.IsBreak,
             checkProperties.PercentThreshold,
+            checkProperties.FollowRedirect,
             checkProperties.AllowInsecure,
             new CheckProfile(1, 1))) {  // force immediate healthy/unhealthy state
 
