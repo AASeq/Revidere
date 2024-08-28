@@ -79,6 +79,7 @@ internal sealed class Configuration {
                 var isVisible = ParseBool(checkConfig, "visible", true);
                 var isBreak = ParseBool(checkConfig, "break", false);
                 var percent = ParseNullableInteger(checkConfig, "percent", 1, 100);
+                var allowInsecure = ParseBool(checkConfig, "insecure", false);
 
                 var checkProperties = new CheckProperties(
                     checkKind,
@@ -88,6 +89,7 @@ internal sealed class Configuration {
                     isVisible,
                     isBreak,
                     percent,
+                    allowInsecure,
                     new CheckProfile(checkPeriod, checkTimeout, checkSuccess, checkFailure)
                 );
                 var check = Check.FromProperties(checkProperties);
@@ -121,6 +123,7 @@ internal sealed class Configuration {
                 true,  // Visible
                 false,  // Break
                 null,  // Percent
+                false,  // AllowInsecure
                 CheckProfile.Default));
             if (check != null) { checks.Add(check); }
             Log.Information("Configured check {check}", check);

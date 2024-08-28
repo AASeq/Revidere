@@ -82,6 +82,10 @@ This node is mandatory.
 Key `target` is a mandatory and its value must be URL that request is sent to.
 Kind matches the HTTP method to be used.
 
+Key `insecure` is an optional boolean key with default of `false`. If set to
+`true`, HTTP/S connections without certificate check will be allowed. Ignored for
+HTTP targets.
+
 Example:
 ```yaml
 - kind: get

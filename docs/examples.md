@@ -46,6 +46,19 @@ to use HEAD):
 CHECKS=https://example.com
 ```
 
+## Check Internal HTTP/S Website
+
+Adds check for internal HTTP/S site with self-signed certificate.
+
+```yaml
+checks:
+  - kind: get
+    target: https://192.168.0.1
+    insecure: true
+```
+
+No equivalent for when using just an environment variable.
+
 
 ## Random
 

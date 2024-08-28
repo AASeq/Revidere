@@ -22,13 +22,20 @@ internal sealed class HttpCheck : Check {
         };
 
         TargetUrl = new Uri(checkProperties.Target);
+
+        if (checkProperties.AllowInsecure == true) {
+            HttpClient = new(new HttpClientHandler {
+                ClientCertificateOptions = ClientCertificateOption.Manual,
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
+            });
+        } else {
+            HttpClient = new();
+        }
     }
 
     private readonly Uri TargetUrl;
     private readonly HttpMethod Method;
-
-
-    private static readonly HttpClient HttpClient = new();
+    private readonly HttpClient HttpClient;
 
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
         var sw = Stopwatch.StartNew();
@@ -45,7 +52,7 @@ internal sealed class HttpCheck : Check {
             Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", "Timeout", sw.ElapsedMilliseconds);
             return false;
         } catch (Exception ex) {
-            while(ex.InnerException != null) { ex = ex.InnerException; }  // unwrap all exceptions
+            while (ex.InnerException != null) { ex = ex.InnerException; }  // unwrap all exceptions
             if (ex is HttpRequestException hrex) {
                 Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", hrex.Message, sw.ElapsedMilliseconds);
             } else {
