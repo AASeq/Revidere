@@ -2,6 +2,7 @@ namespace Revidere;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading;
 using Serilog;
@@ -18,14 +19,15 @@ internal sealed class PingCheck : Check {
 
 
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
+        var sw = Stopwatch.StartNew();
         try {
             var pingSender = new Ping();
             PingReply reply = pingSender.Send(Host, (int)Properties.CheckProfile.Timeout.TotalMilliseconds);
             var isHealthy = (reply.Status == IPStatus.Success);
-            Log.Verbose("{Check} status: {Status} ({Code})", this, isHealthy ? "Healthy" : "Unhealthy", reply.Status);
+            Log.Verbose("{Check} status: {Status} ({Code}; {Duration}ms)", this, isHealthy ? "Healthy" : "Unhealthy", reply.Status, sw.ElapsedMilliseconds);
             return isHealthy;
         } catch (Exception ex) {
-            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", ex.Message);
+            Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", ex.Message, sw.ElapsedMilliseconds);
             return false;
         }
     }

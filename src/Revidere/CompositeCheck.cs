@@ -2,6 +2,7 @@ namespace Revidere;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Serilog;
 
@@ -31,6 +32,7 @@ internal sealed class CompositeCheck : Check {
         var healthyCount = 0;
         var totalCount = 0;
 
+        var sw = Stopwatch.StartNew();
         foreach (var checkState in checkStates) {
             if ((checkState.Check.Properties.Name == null) || !CheckNames.ContainsKey(checkState.Check.Properties.Name)) { continue; }
 
@@ -39,7 +41,7 @@ internal sealed class CompositeCheck : Check {
         }
 
         var isHelthy = (totalCount > 0) && ((healthyCount * 100 / totalCount) >= (Properties.PercentThreshold ?? 100));
-        Log.Verbose("{Check} status: {Status} ({Healthy}/{Total})", this, isHelthy ? "Healthy" : "Unhealthy", healthyCount, totalCount);
+        Log.Verbose("{Check} status: {Status} ({Healthy}/{Total}; {Duration}ms)", this, isHelthy ? "Healthy" : "Unhealthy", healthyCount, totalCount, sw.ElapsedMilliseconds);
 
         return isHelthy;
     }

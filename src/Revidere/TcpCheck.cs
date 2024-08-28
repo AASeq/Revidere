@@ -2,6 +2,7 @@ namespace Revidere;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net.Sockets;
 using System.Threading;
 using Serilog;
@@ -29,6 +30,7 @@ internal sealed class TcpCheck : Check {
 
 
     public override bool CheckIsHealthy(IReadOnlyList<CheckState> checkStates, CancellationToken cancellationToken) {
+        var sw = Stopwatch.StartNew();
         try {
             var timeoutCancelSource = new CancellationTokenSource(Properties.CheckProfile.Timeout);
             var linkedCancelSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCancelSource.Token);
@@ -37,13 +39,13 @@ internal sealed class TcpCheck : Check {
             var connectTask = client.ConnectAsync(Host, Port, linkedCancelSource.Token);
             connectTask.ConfigureAwait(false).GetAwaiter().GetResult();
 
-            Log.Verbose("{Check} status: {Status}", this, "Healthy");
+            Log.Verbose("{Check} status: {Status} ({Duration}ms)", this, "Healthy", sw.ElapsedMilliseconds);
             return true;
         } catch (OperationCanceledException) {
-            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", "Timeout");
+            Log.Verbose("{Check} status: {Status} ({Error}; ; {Duration}ms)", this, "Unhealthy", "Timeout", sw.ElapsedMilliseconds);
             return false;
         } catch (Exception ex) {
-            Log.Verbose("{Check} status: {Status} ({Error})", this, "Unhealthy", ex.Message);
+            Log.Verbose("{Check} status: {Status} ({Error}; {Duration}ms)", this, "Unhealthy", ex.Message, sw.ElapsedMilliseconds);
             return false;
         }
     }
