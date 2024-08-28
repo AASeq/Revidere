@@ -10,6 +10,7 @@ internal sealed class CompositeCheck : Check {
 
     internal CompositeCheck(CheckProperties checkProperties)
         : base(new CheckProperties(
+            checkProperties.Index,
             checkProperties.Kind,
             checkProperties.Target,
             checkProperties.Title,

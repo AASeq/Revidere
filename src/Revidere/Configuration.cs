@@ -23,6 +23,7 @@ internal sealed class Configuration {
         var checks = new List<Check>();
         WebConfiguration webConfiguration = WebConfiguration.Default;
 
+        var checkIndex = 0;
         if (config != null) {
 
             // Config: Logging
@@ -56,6 +57,8 @@ internal sealed class Configuration {
 
             var checksConfigList = config.GetSequenceProperties("checks");
             foreach (var checkConfig in checksConfigList) {
+                checkIndex++;
+
                 checkConfig.TryGetValue("kind", out var checkKind);
                 checkConfig.TryGetValue("target", out var checkTargetText);  // either just number target (default) or allow URL-based target
                 checkConfig.TryGetValue("name", out var checkName);
@@ -83,6 +86,7 @@ internal sealed class Configuration {
                 var allowInsecure = ParseBool(checkConfig, "insecure", false);
 
                 var checkProperties = new CheckProperties(
+                    checkIndex,
                     checkKind,
                     checkTarget ?? "",
                     checkTitle ?? checkName ?? checkKind,
@@ -111,6 +115,8 @@ internal sealed class Configuration {
 
         var envCheckTargetUrls = Environment.GetEnvironmentVariable("CHECKS")?.Split(new char[] { ';', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
         foreach (var targetUrl in envCheckTargetUrls) {
+            checkIndex++;
+
             (var checkKind, var checkTarget) = GetCheckKindAndTarget(targetUrl);
             if (checkKind == null) {
                 Log.Warning($"Check kind not set for '{targetUrl}'; skipping check");
@@ -118,6 +124,7 @@ internal sealed class Configuration {
             }
 
             var check = Check.FromProperties(new CheckProperties(
+                checkIndex,
                 checkKind,
                 checkTarget,
                 null,  // Title

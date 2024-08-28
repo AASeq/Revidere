@@ -7,7 +7,9 @@ namespace Revidere;
 
 internal partial record CheckProperties {
 
-    public CheckProperties(string kind, string? target, string? title, string? name, bool isVisible, bool isBreak, int? percentThreshold, bool followRedirect, bool allowInsecure, CheckProfile profile) {
+    public CheckProperties(int index, string kind, string? target, string? title, string? name, bool isVisible, bool isBreak, int? percentThreshold, bool followRedirect, bool allowInsecure, CheckProfile profile) {
+        Index = index;
+
         kind = kind.Trim();
         name = string.IsNullOrEmpty(name) ? null : name.Trim();  // if empty, assume null
 
@@ -91,12 +93,14 @@ internal partial record CheckProperties {
     /// </summary>
     public override string ToString() {
         var sb = new StringBuilder();
-        if (!string.IsNullOrEmpty(Name)) { sb.Append(Name); } else { sb.Append('#').Append(Index.ToString(CultureInfo.InvariantCulture)); }
-
-        sb.Append(' ');
         sb.Append(Kind);
-
         if (!string.IsNullOrEmpty(Target)) { sb.Append(' ').Append(Target); }
+
+        if (!string.IsNullOrEmpty(Name)) {
+            sb.Append(' ').Append('"').Append(Name).Append('"');
+        } else {
+            sb.Append(' ').Append('#').Append(Index.ToString(CultureInfo.InvariantCulture));
+        }
 
         return sb.ToString();
     }
