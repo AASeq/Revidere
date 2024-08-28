@@ -2,6 +2,7 @@ namespace Revidere;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Serilog;
 
 internal sealed class CheckState {
@@ -24,11 +25,18 @@ internal sealed class CheckState {
     /// </summary>
     public bool? IsHealthy { get; private set; }
 
-    private readonly List<bool> _healthHistory = new();
+    private readonly object HistoryLock = new();
+    private readonly List<bool> _healthHistory = [];
     /// <summary>
     /// Gets check history.
     /// </summary>
-    public IReadOnlyList<bool> HealthHistory => _healthHistory.AsReadOnly();
+    public IReadOnlyList<bool> HealthHistory {
+        get {
+            lock (HistoryLock) {
+                return _healthHistory.ToImmutableList();
+            }
+        }
+    }
 
 
     /// <summary>
@@ -52,32 +60,34 @@ internal sealed class CheckState {
     /// </summary>
     /// <param name="isHealthy">Status.</param>
     public void UpdateCheck(bool isHealthy) {
-        var timestamp = DateTimeOffset.Now;
+        lock (HistoryLock) {
+            var timestamp = DateTimeOffset.Now;
 
-        if (FirstUpdated == null) { FirstUpdated = timestamp; }
-        LastUpdated = timestamp;
+            if (FirstUpdated == null) { FirstUpdated = timestamp; }
+            LastUpdated = timestamp;
 
-        _healthHistory.Add(isHealthy);
-        while (_healthHistory.Count > 10) { _healthHistory.RemoveAt(0); }
+            _healthHistory.Add(isHealthy);
+            while (_healthHistory.Count > 10) { _healthHistory.RemoveAt(0); }
 
-        if (isHealthy != IsHealthy) {  // check only if status has changed
-            var maxCount = isHealthy ? Check.Properties.CheckProfile.SuccessCount : Check.Properties.CheckProfile.FailureCount;
-            if (_healthHistory.Count >= maxCount) {
-                var anyNonMatching = false;
-                for (var i = _healthHistory.Count - maxCount; i < _healthHistory.Count; i++) {
-                    if (_healthHistory[i] != isHealthy) {
-                        anyNonMatching = true;
-                        break;
+            if (isHealthy != IsHealthy) {  // check only if status has changed
+                var maxCount = isHealthy ? Check.Properties.CheckProfile.SuccessCount : Check.Properties.CheckProfile.FailureCount;
+                if (_healthHistory.Count >= maxCount) {
+                    var anyNonMatching = false;
+                    for (var i = _healthHistory.Count - maxCount; i < _healthHistory.Count; i++) {
+                        if (_healthHistory[i] != isHealthy) {
+                            anyNonMatching = true;
+                            break;
+                        }
+                    }
+                    if (!anyNonMatching) {
+                        IsHealthy = isHealthy;
+                        Log.Debug("Changed state for {Check}: {Status} (after {Count} checks)", Check, isHealthy ? "healthy" : "unhealthy", maxCount);
+                        LastChanged = timestamp;
                     }
                 }
-                if (!anyNonMatching) {
-                    IsHealthy = isHealthy;
-                    Log.Debug("Changed state for {Check}: {Status} (after {Count} checks)", Check, isHealthy ? "healthy" : "unhealthy", maxCount);
-                    LastChanged = timestamp;
-                }
             }
-        }
 
+        }
     }
 
 }
